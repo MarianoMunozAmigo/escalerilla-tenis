@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
@@ -60,6 +61,8 @@ export async function createMatch(formData: FormData) {
       `/admin?error=No+se+pudo+guardar+el+partido:+${encodeURIComponent(insertError.message)}`
     );
   }
+
+  revalidatePath("/admin");
 
   redirect("/admin?success=Partido+registrado+correctamente");
 }
@@ -135,6 +138,9 @@ export async function updateMatch(formData: FormData) {
     );
   }
 
+  revalidatePath("/admin");
+  revalidatePath(`/admin/partidos/${matchId}`);
+
   redirect("/admin?success=Partido+actualizado+correctamente");
 }
 
@@ -152,6 +158,8 @@ export async function deleteMatch(formData: FormData) {
       `/admin?error=No+se+pudo+eliminar+el+partido:+${encodeURIComponent(error.message)}`
     );
   }
+
+  revalidatePath("/admin");
 
   redirect("/admin?success=Partido+eliminado+correctamente");
 }
