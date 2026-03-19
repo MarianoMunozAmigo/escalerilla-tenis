@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "../../lib/supabase-admin";
@@ -193,6 +194,8 @@ export async function deleteMatch(formData: FormData) {
     revalidatePath(`/jugadores/${currentMatch.player_1_id}`);
     revalidatePath(`/jugadores/${currentMatch.player_2_id}`);
   }
+
+  revalidatePath("/admin");
 
   redirect("/admin?success=Partido+eliminado+correctamente");
 }
