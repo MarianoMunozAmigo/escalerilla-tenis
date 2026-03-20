@@ -27,18 +27,24 @@ export async function createMatch(formData: FormData) {
   const loserId = winnerId === player1Id ? player2Id : player1Id;
   const loserPoints = superTiebreak ? 1 : 0;
 
-  const { data: existingMatches, error: existingError } = await supabaseAdmin
+  const { data: allMatches, error: existingError } = await supabaseAdmin
     .from("matches")
-    .select("id")
-    .or(
-      `and(player_1_id.eq.${player1Id},player_2_id.eq.${player2Id}),and(player_1_id.eq.${player2Id},player_2_id.eq.${player1Id})`
-    );
+    .select("id, player_1_id, player_2_id");
 
   if (existingError) {
-    redirect("/admin?error=No+fue+posible+validar+los+enfrentamientos+existentes");
+    redirect(
+      `/admin?error=No+fue+posible+validar+los+enfrentamientos:+${encodeURIComponent(
+        existingError.message
+      )}`
+    );
   }
 
-  const matchesPlayed = existingMatches?.length ?? 0;
+  const matchesPlayed =
+    allMatches?.filter(
+      (match) =>
+        (match.player_1_id === player1Id && match.player_2_id === player2Id) ||
+        (match.player_1_id === player2Id && match.player_2_id === player1Id)
+    ).length ?? 0;
 
   if (matchesPlayed >= 2) {
     redirect("/admin?error=Esta+pareja+de+jugadores+ya+completo+sus+2+enfrentamientos+permitidos");
@@ -57,7 +63,11 @@ export async function createMatch(formData: FormData) {
   });
 
   if (insertError) {
-    redirect(`/admin?error=No+se+pudo+guardar+el+partido:+${encodeURIComponent(insertError.message)}`);
+    redirect(
+      `/admin?error=No+se+pudo+guardar+el+partido:+${encodeURIComponent(
+        insertError.message
+      )}`
+    );
   }
 
   revalidatePath("/");
@@ -92,36 +102,50 @@ export async function updateMatch(formData: FormData) {
     .single();
 
   if (!player1Id || !player2Id || !winnerId || !scoreText || !matchDate) {
-    redirect(`/admin/partidos/${matchId}?error=Todos+los+campos+obligatorios+deben+completarse`);
+    redirect(
+      `/admin/partidos/${matchId}?error=Todos+los+campos+obligatorios+deben+completarse`
+    );
   }
 
   if (player1Id === player2Id) {
-    redirect(`/admin/partidos/${matchId}?error=Un+jugador+no+puede+enfrentarse+a+si+mismo`);
+    redirect(
+      `/admin/partidos/${matchId}?error=Un+jugador+no+puede+enfrentarse+a+si+mismo`
+    );
   }
 
   if (winnerId !== player1Id && winnerId !== player2Id) {
-    redirect(`/admin/partidos/${matchId}?error=El+ganador+debe+ser+uno+de+los+dos+jugadores+seleccionados`);
+    redirect(
+      `/admin/partidos/${matchId}?error=El+ganador+debe+ser+uno+de+los+dos+jugadores+seleccionados`
+    );
   }
 
   const loserId = winnerId === player1Id ? player2Id : player1Id;
   const loserPoints = superTiebreak ? 1 : 0;
 
-  const { data: existingMatches, error: existingError } = await supabaseAdmin
+  const { data: allMatches, error: existingError } = await supabaseAdmin
     .from("matches")
-    .select("id")
-    .neq("id", matchId)
-    .or(
-      `and(player_1_id.eq.${player1Id},player_2_id.eq.${player2Id}),and(player_1_id.eq.${player2Id},player_2_id.eq.${player1Id})`
-    );
+    .select("id, player_1_id, player_2_id");
 
   if (existingError) {
-    redirect(`/admin/partidos/${matchId}?error=No+fue+posible+validar+los+enfrentamientos+existentes`);
+    redirect(
+      `/admin/partidos/${matchId}?error=No+fue+posible+validar+los+enfrentamientos:+${encodeURIComponent(
+        existingError.message
+      )}`
+    );
   }
 
-  const matchesPlayed = existingMatches?.length ?? 0;
+  const matchesPlayed =
+    allMatches?.filter(
+      (match) =>
+        match.id !== matchId &&
+        ((match.player_1_id === player1Id && match.player_2_id === player2Id) ||
+          (match.player_1_id === player2Id && match.player_2_id === player1Id))
+    ).length ?? 0;
 
   if (matchesPlayed >= 2) {
-    redirect(`/admin/partidos/${matchId}?error=Esta+pareja+de+jugadores+ya+completo+sus+2+enfrentamientos+permitidos`);
+    redirect(
+      `/admin/partidos/${matchId}?error=Esta+pareja+de+jugadores+ya+completo+sus+2+enfrentamientos+permitidos`
+    );
   }
 
   const { error: updateError } = await supabaseAdmin
@@ -140,7 +164,11 @@ export async function updateMatch(formData: FormData) {
     .eq("id", matchId);
 
   if (updateError) {
-    redirect(`/admin/partidos/${matchId}?error=No+se+pudo+actualizar+el+partido:+${encodeURIComponent(updateError.message)}`);
+    redirect(
+      `/admin/partidos/${matchId}?error=No+se+pudo+actualizar+el+partido:+${encodeURIComponent(
+        updateError.message
+      )}`
+    );
   }
 
   revalidatePath("/");
@@ -157,6 +185,7 @@ export async function updateMatch(formData: FormData) {
   }
 
   revalidatePath("/admin");
+
   redirect("/admin?success=Partido+actualizado+correctamente");
 }
 
@@ -179,7 +208,11 @@ export async function deleteMatch(formData: FormData) {
     .eq("id", matchId);
 
   if (error) {
-    redirect(`/admin?error=No+se+pudo+eliminar+el+partido:+${encodeURIComponent(error.message)}`);
+    redirect(
+      `/admin?error=No+se+pudo+eliminar+el+partido:+${encodeURIComponent(
+        error.message
+      )}`
+    );
   }
 
   revalidatePath("/");
@@ -193,8 +226,6 @@ export async function deleteMatch(formData: FormData) {
     revalidatePath(`/jugadores/${currentMatch.player_1_id}`);
     revalidatePath(`/jugadores/${currentMatch.player_2_id}`);
   }
-
-  revalidatePath("/admin");
 
   redirect("/admin?success=Partido+eliminado+correctamente");
 }
