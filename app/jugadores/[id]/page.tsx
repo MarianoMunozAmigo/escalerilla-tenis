@@ -137,16 +137,16 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-cyan-300/20 blur-3xl" />
           <div className="absolute -bottom-12 left-0 h-40 w-40 rounded-full bg-orange-300/20 blur-3xl" />
 
-          <div className="relative grid lg:grid-cols-[340px_1fr]">
+          <div className="relative grid lg:grid-cols-[380px_1fr]">
             <div className="flex items-center justify-center bg-gradient-to-b from-cyan-50 via-white to-orange-50 p-6">
               {safePlayer.photo_url ? (
                 <img
                   src={safePlayer.photo_url}
                   alt={safePlayer.name}
-                  className="max-h-[320px] max-w-full rounded-[2rem] object-contain p-2 sm:max-h-[380px] lg:max-h-[420px]"
+                  className="max-h-[500px] w-full rounded-[2rem] object-contain"
                 />
               ) : (
-                <div className="flex h-[280px] w-full items-center justify-center rounded-[2rem] border border-dashed border-slate-300 bg-slate-100 text-sm text-slate-500 sm:h-[340px]">
+                <div className="flex h-[420px] w-full items-center justify-center rounded-[2rem] border border-dashed border-slate-300 bg-slate-100 text-sm text-slate-500">
                   Sin fotografía
                 </div>
               )}

@@ -42,7 +42,7 @@ export default function MainNav() {
               <img
                 src="/logo/escalerilla-logo.png"
                 alt="Escalerilla Locos x el Tenis"
-                className="h-full w-full object-contain p-1"
+                className="h-full w-full object-cover"
               />
             </div>
 

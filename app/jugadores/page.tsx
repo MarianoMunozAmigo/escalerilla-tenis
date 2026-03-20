@@ -37,15 +37,15 @@ export default async function JugadoresPage() {
                 href={`/jugadores/${player.id}`}
                 className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="relative flex h-56 items-center justify-center overflow-hidden bg-gradient-to-b from-cyan-50 via-white to-orange-50 p-4 sm:h-64">
+                <div className="relative flex h-72 items-center justify-center overflow-hidden bg-gradient-to-b from-cyan-50 via-white to-orange-50 p-6">
                   {player.photo_url ? (
                     <img
                       src={player.photo_url}
                       alt={player.name}
-                      className="max-h-full max-w-full rounded-2xl object-contain object-center p-2"
+                      className="max-h-full max-w-full rounded-[1.5rem] object-contain"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-100 text-sm text-slate-500">
+                    <div className="flex h-full w-full items-center justify-center rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-100 text-sm text-slate-500">
                       Sin fotografía
                     </div>
                   )}
