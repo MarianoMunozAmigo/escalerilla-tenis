@@ -26,14 +26,8 @@ function getPositionBadge(position: number) {
 }
 
 function getStreakStyles(streak: string) {
-  if (streak.startsWith("W")) {
-    return "bg-emerald-100 text-emerald-700";
-  }
-
-  if (streak.startsWith("L")) {
-    return "bg-red-100 text-red-700";
-  }
-
+  if (streak.startsWith("W")) return "bg-emerald-100 text-emerald-700";
+  if (streak.startsWith("L")) return "bg-red-100 text-red-700";
   return "bg-slate-100 text-slate-700";
 }
 
@@ -99,7 +93,7 @@ export default function TableModule({
                   <div className="text-center">
                     <div
                       className={`mx-auto flex items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow ${
-                        isFirst ? "h-20 w-20 sm:h-24 sm:w-24" : "h-18 w-18 sm:h-20 sm:w-20"
+                        isFirst ? "h-18 w-18 sm:h-20 sm:w-20" : "h-16 w-16 sm:h-18 sm:w-18"
                       }`}
                     >
                       {player.photo_url ? (
@@ -109,7 +103,7 @@ export default function TableModule({
                           className="h-full w-full object-contain p-1"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
+                        <div className="flex h-full w-full items-center justify-center text-[10px] text-slate-500">
                           Sin foto
                         </div>
                       )}
@@ -126,7 +120,10 @@ export default function TableModule({
                     <p className="mt-2 text-sm text-slate-600">{player.points} pts</p>
 
                     <div className="mt-2 text-xs font-semibold text-slate-600">
-                      DG {player.game_difference > 0 ? `+${player.game_difference}` : player.game_difference}
+                      DG{" "}
+                      {player.game_difference > 0
+                        ? `+${player.game_difference}`
+                        : player.game_difference}
                     </div>
 
                     <div className="mt-3">
@@ -205,7 +202,7 @@ export default function TableModule({
 
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white sm:h-12 sm:w-12">
+                          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white sm:h-10 sm:w-10">
                             {row.photo_url ? (
                               <img
                                 src={row.photo_url}

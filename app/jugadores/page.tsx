@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
+
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import type { Player } from "../../types/player";
@@ -16,7 +17,7 @@ export default async function JugadoresPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mobile-safe-x mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
         <ModuleHero
           title="Jugadores"
           description="Perfil deportivo de cada participante, con acceso a su ficha individual, estadísticas y estilo de juego."
@@ -36,12 +37,12 @@ export default async function JugadoresPage() {
                 href={`/jugadores/${player.id}`}
                 className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="relative flex h-80 items-center justify-center overflow-hidden bg-gradient-to-b from-cyan-50 via-white to-orange-50 p-4">
+                <div className="relative flex h-56 items-center justify-center overflow-hidden bg-gradient-to-b from-cyan-50 via-white to-orange-50 p-4 sm:h-64">
                   {player.photo_url ? (
                     <img
                       src={player.photo_url}
                       alt={player.name}
-                      className="h-full w-full rounded-2xl object-contain object-center transition duration-300 group-hover:scale-[1.02]"
+                      className="max-h-full max-w-full rounded-2xl object-contain object-center p-2"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-100 text-sm text-slate-500">
@@ -50,7 +51,9 @@ export default async function JugadoresPage() {
                   )}
 
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-transparent px-5 pb-5 pt-12">
-                    <h2 className="text-2xl font-black text-white">{player.name}</h2>
+                    <h2 className="text-xl font-black text-white sm:text-2xl">
+                      {player.name}
+                    </h2>
                   </div>
                 </div>
 

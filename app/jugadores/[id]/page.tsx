@@ -122,7 +122,7 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl px-6 py-10">
+      <div className="mobile-safe-x mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
         <div className="mb-6">
           <Link
             href="/jugadores"
@@ -137,22 +137,22 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
           <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-cyan-300/20 blur-3xl" />
           <div className="absolute -bottom-12 left-0 h-40 w-40 rounded-full bg-orange-300/20 blur-3xl" />
 
-          <div className="relative grid lg:grid-cols-[380px_1fr]">
+          <div className="relative grid lg:grid-cols-[340px_1fr]">
             <div className="flex items-center justify-center bg-gradient-to-b from-cyan-50 via-white to-orange-50 p-6">
               {safePlayer.photo_url ? (
                 <img
                   src={safePlayer.photo_url}
                   alt={safePlayer.name}
-                  className="max-h-[500px] w-full rounded-[2rem] object-contain"
+                  className="max-h-[320px] max-w-full rounded-[2rem] object-contain p-2 sm:max-h-[380px] lg:max-h-[420px]"
                 />
               ) : (
-                <div className="flex h-[420px] w-full items-center justify-center rounded-[2rem] border border-dashed border-slate-300 bg-slate-100 text-sm text-slate-500">
+                <div className="flex h-[280px] w-full items-center justify-center rounded-[2rem] border border-dashed border-slate-300 bg-slate-100 text-sm text-slate-500 sm:h-[340px]">
                   Sin fotografía
                 </div>
               )}
             </div>
 
-            <div className="relative p-8">
+            <div className="relative p-6 sm:p-8">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 text-xs font-bold text-yellow-700">
                   {safePlayer.handedness || "Mano no registrada"}
@@ -169,7 +169,7 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
                 </span>
               </div>
 
-              <h1 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
+              <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
                 {safePlayer.name}
               </h1>
 
