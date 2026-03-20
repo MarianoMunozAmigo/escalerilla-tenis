@@ -37,7 +37,12 @@ function getStreakStyles(streak: string) {
   return "bg-slate-100 text-slate-700";
 }
 
-export default function TableModule({ standings }: TableModuleProps) {
+export default function TableModule({
+  standings,
+  totalMatches,
+  totalPlayers,
+  totalPoints,
+}: TableModuleProps) {
   const [search, setSearch] = useState("");
 
   const filteredStandings = useMemo(() => {
@@ -50,11 +55,34 @@ export default function TableModule({ standings }: TableModuleProps) {
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-7xl px-6 py-10">
-        <section>
-          <h2 className="mb-6 text-3xl font-black tracking-tight">Podio</h2>
+      <div className="mobile-safe-x mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+        <section className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+              Jugadores
+            </p>
+            <p className="mt-2 text-2xl font-black">{totalPlayers}</p>
+          </div>
 
-          <div className="flex flex-col items-center gap-6 md:flex-row md:items-end md:justify-center">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+              Partidos
+            </p>
+            <p className="mt-2 text-2xl font-black">{totalMatches}</p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+              Puntos repartidos
+            </p>
+            <p className="mt-2 text-2xl font-black">{totalPoints}</p>
+          </div>
+        </section>
+
+        <section className="mt-8">
+          <h2 className="mb-4 text-2xl font-black tracking-tight sm:text-3xl">Podio</h2>
+
+          <div className="grid gap-4 md:grid-cols-3 md:items-end">
             {podiumOrder.map((player) => {
               const position =
                 standings.findIndex((p) => p.player_id === player.player_id) + 1;
@@ -64,14 +92,14 @@ export default function TableModule({ standings }: TableModuleProps) {
               return (
                 <article
                   key={player.player_id}
-                  className={`rounded-3xl border p-6 shadow-sm transition ${
-                    isFirst ? "scale-105" : "scale-95"
+                  className={`rounded-3xl border p-5 shadow-sm transition ${
+                    isFirst ? "md:scale-105" : "md:scale-95"
                   } ${getPositionStyles(position)}`}
                 >
                   <div className="text-center">
                     <div
                       className={`mx-auto flex items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow ${
-                        isFirst ? "h-28 w-28" : "h-24 w-24"
+                        isFirst ? "h-24 w-24 sm:h-28 sm:w-28" : "h-20 w-20 sm:h-24 sm:w-24"
                       }`}
                     >
                       {player.photo_url ? (
@@ -89,17 +117,15 @@ export default function TableModule({ standings }: TableModuleProps) {
 
                     <p className="mt-4 text-3xl">{getPositionBadge(position)}</p>
 
-                    <h3 className="mt-2 text-xl font-bold">
+                    <h3 className="mt-2 text-lg font-bold sm:text-xl">
                       <Link href={`/jugadores/${player.player_id}`}>
                         {player.player_name}
                       </Link>
                     </h3>
 
-                    <p className="mt-2 text-sm text-slate-600">
-                      {player.points} pts
-                    </p>
+                    <p className="mt-2 text-sm text-slate-600">{player.points} pts</p>
 
-                    <div className="mt-2 text-xs text-slate-600">
+                    <div className="mt-2 text-xs font-semibold text-slate-600">
                       DG {player.game_difference > 0 ? `+${player.game_difference}` : player.game_difference}
                     </div>
 
@@ -119,16 +145,16 @@ export default function TableModule({ standings }: TableModuleProps) {
           </div>
         </section>
 
-        <section className="mt-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h2 className="text-2xl font-black">Clasificación general</h2>
-              <p className="mt-1 text-slate-600">
+              <h2 className="text-xl font-black sm:text-2xl">Clasificación general</h2>
+              <p className="mt-1 text-sm text-slate-600">
                 Ordenada por puntos, diferencia de juegos, juegos a favor, diferencia de sets, victorias y nombre.
               </p>
             </div>
 
-            <div>
+            <div className="w-full lg:max-w-xs">
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 Buscar jugador
               </label>
@@ -137,12 +163,12 @@ export default function TableModule({ standings }: TableModuleProps) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Escribe un nombre"
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 outline-none transition focus:border-slate-500"
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-slate-500"
               />
             </div>
           </div>
 
-          <div className="mt-6 overflow-x-auto">
+          <div className="mt-6 hidden overflow-x-auto md:block">
             <table className="min-w-full overflow-hidden text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-100 text-slate-700">
@@ -250,6 +276,121 @@ export default function TableModule({ standings }: TableModuleProps) {
                 })}
               </tbody>
             </table>
+
+            {filteredStandings.length === 0 && (
+              <div className="py-10 text-center text-slate-500">
+                No hay jugadores que coincidan con la búsqueda.
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 grid gap-3 md:hidden">
+            {filteredStandings.map((row) => {
+              const realPosition =
+                standings.findIndex((p) => p.player_id === row.player_id) + 1;
+
+              return (
+                <article
+                  key={row.player_id}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">
+                      {realPosition}
+                    </span>
+
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
+                        {row.photo_url ? (
+                          <img
+                            src={row.photo_url}
+                            alt={row.player_name}
+                            className="h-full w-full object-contain"
+                          />
+                        ) : null}
+                      </div>
+
+                      <div className="min-w-0">
+                        <Link
+                          href={`/jugadores/${row.player_id}`}
+                          className="block truncate font-bold text-slate-900"
+                        >
+                          {row.player_name}
+                        </Link>
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                          <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">
+                            {row.points} pts
+                          </span>
+                          <span className="text-xs font-semibold text-slate-600">
+                            DG {row.game_difference > 0 ? `+${row.game_difference}` : row.game_difference}
+                          </span>
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${getStreakStyles(
+                              row.streak
+                            )}`}
+                          >
+                            {row.streak}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-4 gap-2 text-center">
+                    <div className="rounded-xl bg-white p-2">
+                      <div className="text-[11px] font-bold uppercase text-slate-500">PJ</div>
+                      <div className="mt-1 text-sm font-black">{row.played}</div>
+                    </div>
+                    <div className="rounded-xl bg-white p-2">
+                      <div className="text-[11px] font-bold uppercase text-slate-500">PG</div>
+                      <div className="mt-1 text-sm font-black">{row.wins}</div>
+                    </div>
+                    <div className="rounded-xl bg-white p-2">
+                      <div className="text-[11px] font-bold uppercase text-slate-500">PP</div>
+                      <div className="mt-1 text-sm font-black">{row.losses}</div>
+                    </div>
+                    <div className="rounded-xl bg-white p-2">
+                      <div className="text-[11px] font-bold uppercase text-slate-500">DS</div>
+                      <div className="mt-1 text-sm font-black">
+                        {row.set_difference > 0 ? `+${row.set_difference}` : row.set_difference}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-xl bg-white p-2">
+                      <div className="text-[11px] font-bold uppercase text-slate-500">JF</div>
+                      <div className="mt-1 text-sm font-black">{row.games_won}</div>
+                    </div>
+                    <div className="rounded-xl bg-white p-2">
+                      <div className="text-[11px] font-bold uppercase text-slate-500">JC</div>
+                      <div className="mt-1 text-sm font-black">{row.games_lost}</div>
+                    </div>
+                    <div className="rounded-xl bg-white p-2">
+                      <div className="text-[11px] font-bold uppercase text-slate-500">Últimos</div>
+                      <div className="mt-1 flex justify-center gap-1">
+                        {row.last_results.length > 0 ? (
+                          row.last_results.slice(0, 3).map((result, idx) => (
+                            <span
+                              key={`${row.player_id}-${idx}`}
+                              className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
+                                result === "W"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {result}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-slate-400">-</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
 
             {filteredStandings.length === 0 && (
               <div className="py-10 text-center text-slate-500">
