@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "../../lib/supabase-admin";
 
 export async function createMatch(formData: FormData) {

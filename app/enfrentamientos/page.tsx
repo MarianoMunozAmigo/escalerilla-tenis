@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { supabase } from "../../lib/supabase";
 import type { Player } from "../../types/player";
 import type { Match } from "../../types/match";
