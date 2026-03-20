@@ -99,14 +99,14 @@ export default function TableModule({
                   <div className="text-center">
                     <div
                       className={`mx-auto flex items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow ${
-                        isFirst ? "h-24 w-24 sm:h-28 sm:w-28" : "h-20 w-20 sm:h-24 sm:w-24"
+                        isFirst ? "h-20 w-20 sm:h-24 sm:w-24" : "h-18 w-18 sm:h-20 sm:w-20"
                       }`}
                     >
                       {player.photo_url ? (
                         <img
                           src={player.photo_url}
                           alt={player.player_name}
-                          className="h-full w-full object-contain"
+                          className="h-full w-full object-contain p-1"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
@@ -168,8 +168,8 @@ export default function TableModule({
             </div>
           </div>
 
-          <div className="mt-6 hidden overflow-x-auto md:block">
-            <table className="min-w-full overflow-hidden text-sm">
+          <div className="mt-6 overflow-x-auto">
+            <table className="min-w-[980px] overflow-hidden text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-100 text-slate-700">
                   <th className="px-4 py-4 text-left">Pos.</th>
@@ -205,12 +205,12 @@ export default function TableModule({
 
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
+                          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white sm:h-12 sm:w-12">
                             {row.photo_url ? (
                               <img
                                 src={row.photo_url}
                                 alt={row.player_name}
-                                className="h-full w-full object-contain"
+                                className="h-full w-full object-contain p-1"
                               />
                             ) : null}
                           </div>
@@ -276,121 +276,6 @@ export default function TableModule({
                 })}
               </tbody>
             </table>
-
-            {filteredStandings.length === 0 && (
-              <div className="py-10 text-center text-slate-500">
-                No hay jugadores que coincidan con la búsqueda.
-              </div>
-            )}
-          </div>
-
-          <div className="mt-6 grid gap-3 md:hidden">
-            {filteredStandings.map((row) => {
-              const realPosition =
-                standings.findIndex((p) => p.player_id === row.player_id) + 1;
-
-              return (
-                <article
-                  key={row.player_id}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="inline-flex min-w-10 items-center justify-center rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">
-                      {realPosition}
-                    </span>
-
-                    <div className="flex min-w-0 flex-1 items-center gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
-                        {row.photo_url ? (
-                          <img
-                            src={row.photo_url}
-                            alt={row.player_name}
-                            className="h-full w-full object-contain"
-                          />
-                        ) : null}
-                      </div>
-
-                      <div className="min-w-0">
-                        <Link
-                          href={`/jugadores/${row.player_id}`}
-                          className="block truncate font-bold text-slate-900"
-                        >
-                          {row.player_name}
-                        </Link>
-                        <div className="mt-1 flex flex-wrap items-center gap-2">
-                          <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">
-                            {row.points} pts
-                          </span>
-                          <span className="text-xs font-semibold text-slate-600">
-                            DG {row.game_difference > 0 ? `+${row.game_difference}` : row.game_difference}
-                          </span>
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${getStreakStyles(
-                              row.streak
-                            )}`}
-                          >
-                            {row.streak}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-4 gap-2 text-center">
-                    <div className="rounded-xl bg-white p-2">
-                      <div className="text-[11px] font-bold uppercase text-slate-500">PJ</div>
-                      <div className="mt-1 text-sm font-black">{row.played}</div>
-                    </div>
-                    <div className="rounded-xl bg-white p-2">
-                      <div className="text-[11px] font-bold uppercase text-slate-500">PG</div>
-                      <div className="mt-1 text-sm font-black">{row.wins}</div>
-                    </div>
-                    <div className="rounded-xl bg-white p-2">
-                      <div className="text-[11px] font-bold uppercase text-slate-500">PP</div>
-                      <div className="mt-1 text-sm font-black">{row.losses}</div>
-                    </div>
-                    <div className="rounded-xl bg-white p-2">
-                      <div className="text-[11px] font-bold uppercase text-slate-500">DS</div>
-                      <div className="mt-1 text-sm font-black">
-                        {row.set_difference > 0 ? `+${row.set_difference}` : row.set_difference}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-xl bg-white p-2">
-                      <div className="text-[11px] font-bold uppercase text-slate-500">JF</div>
-                      <div className="mt-1 text-sm font-black">{row.games_won}</div>
-                    </div>
-                    <div className="rounded-xl bg-white p-2">
-                      <div className="text-[11px] font-bold uppercase text-slate-500">JC</div>
-                      <div className="mt-1 text-sm font-black">{row.games_lost}</div>
-                    </div>
-                    <div className="rounded-xl bg-white p-2">
-                      <div className="text-[11px] font-bold uppercase text-slate-500">Últimos</div>
-                      <div className="mt-1 flex justify-center gap-1">
-                        {row.last_results.length > 0 ? (
-                          row.last_results.slice(0, 3).map((result, idx) => (
-                            <span
-                              key={`${row.player_id}-${idx}`}
-                              className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold ${
-                                result === "W"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-red-100 text-red-700"
-                              }`}
-                            >
-                              {result}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-xs text-slate-400">-</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
 
             {filteredStandings.length === 0 && (
               <div className="py-10 text-center text-slate-500">

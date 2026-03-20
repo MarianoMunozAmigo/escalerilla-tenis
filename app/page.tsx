@@ -276,12 +276,12 @@ export default async function Home() {
                         {getPositionBadge(position)}
                       </div>
 
-                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-white/20 bg-white/10 sm:h-14 sm:w-14">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 sm:h-14 sm:w-14">
                         {fullPlayer?.photo_url ? (
                           <img
                             src={fullPlayer.photo_url}
                             alt={player.player_name}
-                            className="h-full w-full object-contain"
+                            className="h-full w-full object-contain p-1"
                           />
                         ) : null}
                       </div>
