@@ -99,6 +99,10 @@ export default function TableModule({ standings }: TableModuleProps) {
                       {player.points} pts
                     </p>
 
+                    <div className="mt-2 text-xs text-slate-600">
+                      DG {player.game_difference > 0 ? `+${player.game_difference}` : player.game_difference}
+                    </div>
+
                     <div className="mt-3">
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${getStreakStyles(
@@ -120,7 +124,7 @@ export default function TableModule({ standings }: TableModuleProps) {
             <div>
               <h2 className="text-2xl font-black">Clasificación general</h2>
               <p className="mt-1 text-slate-600">
-                Ordenada por puntos, victorias, derrotas y nombre.
+                Ordenada por puntos, diferencia de juegos, juegos a favor, diferencia de sets, victorias y nombre.
               </p>
             </div>
 
@@ -148,6 +152,10 @@ export default function TableModule({ standings }: TableModuleProps) {
                   <th className="px-4 py-4 text-center">PG</th>
                   <th className="px-4 py-4 text-center">PP</th>
                   <th className="px-4 py-4 text-center">Pts</th>
+                  <th className="px-4 py-4 text-center">DG</th>
+                  <th className="px-4 py-4 text-center">JF</th>
+                  <th className="px-4 py-4 text-center">JC</th>
+                  <th className="px-4 py-4 text-center">DS</th>
                   <th className="px-4 py-4 text-center">Racha</th>
                   <th className="px-4 py-4 text-center">Últimos</th>
                 </tr>
@@ -199,6 +207,14 @@ export default function TableModule({ standings }: TableModuleProps) {
                         <span className="rounded-full bg-slate-900 px-3 py-1 text-sm font-bold text-white">
                           {row.points}
                         </span>
+                      </td>
+                      <td className="px-4 py-4 text-center font-semibold">
+                        {row.game_difference > 0 ? `+${row.game_difference}` : row.game_difference}
+                      </td>
+                      <td className="px-4 py-4 text-center">{row.games_won}</td>
+                      <td className="px-4 py-4 text-center">{row.games_lost}</td>
+                      <td className="px-4 py-4 text-center font-semibold">
+                        {row.set_difference > 0 ? `+${row.set_difference}` : row.set_difference}
                       </td>
                       <td className="px-4 py-4 text-center">
                         <span

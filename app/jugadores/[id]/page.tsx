@@ -1,12 +1,13 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
+import { buildStandings } from "../../../lib/standings";
 import type { Player } from "../../../types/player";
 import type { Match } from "../../../types/match";
-import type { Standing } from "../../../types/standing";
 
 type PlayerPageProps = {
   params: Promise<{
@@ -69,61 +70,16 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
     playerMap.set(item.id, item.name);
   });
 
-  let wins = 0;
-  let losses = 0;
-  let points = 0;
+  const playerStanding = buildStandings(safePlayers, safeAllMatches).find(
+    (row) => row.player_id === playerId
+  );
 
-  safeMatches.forEach((match) => {
-    if (match.winner_id === playerId) {
-      wins += 1;
-      points += match.winner_points;
-    }
+  const wins = playerStanding?.wins ?? 0;
+  const losses = playerStanding?.losses ?? 0;
+  const points = playerStanding?.points ?? 0;
+  const played = playerStanding?.played ?? 0;
 
-    if (match.loser_id === playerId) {
-      losses += 1;
-      points += match.loser_points;
-    }
-  });
-
-  const played = wins + losses;
-
-  const standingsMap = new Map<number, Standing>();
-
-  safePlayers.forEach((item) => {
-    standingsMap.set(item.id, {
-      player_id: item.id,
-      player_name: item.name,
-      played: 0,
-      wins: 0,
-      losses: 0,
-      points: 0,
-    });
-  });
-
-  safeAllMatches.forEach((match) => {
-    const winner = standingsMap.get(match.winner_id);
-    const loser = standingsMap.get(match.loser_id);
-
-    if (winner) {
-      winner.played += 1;
-      winner.wins += 1;
-      winner.points += match.winner_points;
-    }
-
-    if (loser) {
-      loser.played += 1;
-      loser.losses += 1;
-      loser.points += match.loser_points;
-    }
-  });
-
-  const standings = Array.from(standingsMap.values()).sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    if (a.losses !== b.losses) return a.losses - b.losses;
-    return a.player_name.localeCompare(b.player_name);
-  });
-
+  const standings = buildStandings(safePlayers, safeAllMatches);
   const currentPosition =
     standings.findIndex((row) => row.player_id === playerId) + 1;
 
@@ -358,29 +314,27 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
               {safeMatches.map((match) => {
                 const opponentId =
                   match.player_1_id === playerId ? match.player_2_id : match.player_1_id;
-
                 const opponentName =
                   playerMap.get(opponentId) ?? `Jugador ${opponentId}`;
-
                 const isWinner = match.winner_id === playerId;
 
                 return (
                   <article
                     key={match.id}
-                    className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition hover:bg-white"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <h3 className="text-lg font-black">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                          {match.match_date}
+                        </p>
+                        <h3 className="mt-1 text-lg font-black">
                           {isWinner ? "Victoria" : "Derrota"} ante {opponentName}
                         </h3>
-                        <p className="mt-1 text-sm text-slate-500">
-                          Fecha del partido: {match.match_date}
-                        </p>
                       </div>
 
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-black ${
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${
                           isWinner
                             ? "bg-emerald-100 text-emerald-700"
                             : "bg-orange-100 text-orange-700"
@@ -390,38 +344,12 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
                       </span>
                     </div>
 
-                    <div className="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2 lg:grid-cols-4">
-                      <div className="rounded-2xl bg-white p-3">
-                        <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                          Marcador
-                        </p>
-                        <p className="mt-1 font-semibold text-slate-900">{match.score_text}</p>
-                      </div>
-
-                      <div className="rounded-2xl bg-white p-3">
-                        <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                          Super tie break
-                        </p>
-                        <p className="mt-1 font-semibold text-slate-900">
-                          {match.super_tiebreak ? "Sí" : "No"}
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl bg-white p-3">
-                        <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                          Rival
-                        </p>
-                        <p className="mt-1 font-semibold text-slate-900">{opponentName}</p>
-                      </div>
-
-                      <div className="rounded-2xl bg-white p-3">
-                        <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                          Puntos obtenidos
-                        </p>
-                        <p className="mt-1 font-semibold text-slate-900">
-                          {isWinner ? match.winner_points : match.loser_points}
-                        </p>
-                      </div>
+                    <div className="mt-4 grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
+                      <p>Marcador: {match.score_text}</p>
+                      <p>Super tie break: {match.super_tiebreak ? "Sí" : "No"}</p>
+                      <p>
+                        Puntos: {isWinner ? match.winner_points : match.loser_points}
+                      </p>
                     </div>
                   </article>
                 );

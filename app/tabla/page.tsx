@@ -1,11 +1,11 @@
-
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
+
 import { supabase } from "../../lib/supabase";
+import { buildStandings } from "../../lib/standings";
 import type { Player } from "../../types/player";
 import type { Match } from "../../types/match";
-import type { Standing } from "../../types/standing";
 import type { TablePlayer } from "../../types/table-player";
 import TableModule from "../../components/TableModule";
 
@@ -36,45 +36,12 @@ export default async function TablaPage() {
   const safePlayers: Player[] = players ?? [];
   const safeMatches: Match[] = matches ?? [];
 
-  const standingsMap = new Map<number, Standing>();
   const playerMap = new Map<number, Player>();
-
   safePlayers.forEach((player) => {
     playerMap.set(player.id, player);
-
-    standingsMap.set(player.id, {
-      player_id: player.id,
-      player_name: player.name,
-      played: 0,
-      wins: 0,
-      losses: 0,
-      points: 0,
-    });
   });
 
-  safeMatches.forEach((match) => {
-    const winner = standingsMap.get(match.winner_id);
-    const loser = standingsMap.get(match.loser_id);
-
-    if (winner) {
-      winner.played += 1;
-      winner.wins += 1;
-      winner.points += match.winner_points;
-    }
-
-    if (loser) {
-      loser.played += 1;
-      loser.losses += 1;
-      loser.points += match.loser_points;
-    }
-  });
-
-  const standings = Array.from(standingsMap.values()).sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    if (a.losses !== b.losses) return a.losses - b.losses;
-    return a.player_name.localeCompare(b.player_name);
-  });
+  const standings = buildStandings(safePlayers, safeMatches);
 
   const tablePlayers: TablePlayer[] = standings.map((standing) => {
     const player = playerMap.get(standing.player_id);
@@ -119,6 +86,12 @@ export default async function TablaPage() {
       wins: standing.wins,
       losses: standing.losses,
       points: standing.points,
+      sets_won: standing.sets_won,
+      sets_lost: standing.sets_lost,
+      set_difference: standing.set_difference,
+      games_won: standing.games_won,
+      games_lost: standing.games_lost,
+      game_difference: standing.game_difference,
       streak,
       last_results: lastResults,
     };

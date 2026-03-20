@@ -1,11 +1,12 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
+
 import Link from "next/link";
 import { supabase } from "../lib/supabase";
+import { buildStandings } from "../lib/standings";
 import type { Player } from "../types/player";
 import type { Match } from "../types/match";
-import type { Standing } from "../types/standing";
 
 const modules = [
   {
@@ -79,42 +80,7 @@ export default async function Home() {
     playerMap.set(player.id, player);
   });
 
-  const standingsMap = new Map<number, Standing>();
-  safePlayers.forEach((player) => {
-    standingsMap.set(player.id, {
-      player_id: player.id,
-      player_name: player.name,
-      played: 0,
-      wins: 0,
-      losses: 0,
-      points: 0,
-    });
-  });
-
-  safeMatches.forEach((match) => {
-    const winner = standingsMap.get(match.winner_id);
-    const loser = standingsMap.get(match.loser_id);
-
-    if (winner) {
-      winner.played += 1;
-      winner.wins += 1;
-      winner.points += match.winner_points;
-    }
-
-    if (loser) {
-      loser.played += 1;
-      loser.losses += 1;
-      loser.points += match.loser_points;
-    }
-  });
-
-  const standings = Array.from(standingsMap.values()).sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    if (a.losses !== b.losses) return a.losses - b.losses;
-    return a.player_name.localeCompare(b.player_name);
-  });
-
+  const standings = buildStandings(safePlayers, safeMatches);
   const topThree = standings.slice(0, 3);
 
   const totalPlayers = safePlayers.length;
@@ -256,7 +222,6 @@ export default async function Home() {
                     <div
                       className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${module.color} shadow-lg`}
                     />
-
                     <div className="flex-1">
                       <div className="flex items-center justify-between gap-3">
                         <h3 className="text-lg font-black">{module.title}</h3>
@@ -323,7 +288,10 @@ export default async function Home() {
                       <div className="flex-1">
                         <h3 className="font-black">{player.player_name}</h3>
                         <p className="text-sm text-white/75">
-                          {player.points} pts · {player.wins} PG · {player.losses} PP
+                          {player.points} pts · {player.wins} PG · DG{" "}
+                          {player.game_difference > 0
+                            ? `+${player.game_difference}`
+                            : player.game_difference}
                         </p>
                       </div>
 
