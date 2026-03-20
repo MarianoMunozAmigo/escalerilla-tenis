@@ -98,7 +98,7 @@ export default function TableModule({
                 >
                   <div className="text-center">
                     <div
-                      className={`mx-auto flex items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow ${
+                      className={`mx-auto overflow-hidden rounded-full border-4 border-white bg-white shadow ${
                         isFirst ? "h-24 w-24 sm:h-28 sm:w-28" : "h-20 w-20 sm:h-24 sm:w-24"
                       }`}
                     >
@@ -106,7 +106,7 @@ export default function TableModule({
                         <img
                           src={player.photo_url}
                           alt={player.player_name}
-                          className="h-full w-full object-contain"
+                          className="h-full w-full object-cover"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
@@ -205,12 +205,12 @@ export default function TableModule({
 
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
+                          <div className="h-12 w-12 overflow-hidden rounded-full border border-slate-200 bg-white">
                             {row.photo_url ? (
                               <img
                                 src={row.photo_url}
                                 alt={row.player_name}
-                                className="h-full w-full object-contain"
+                                className="h-full w-full object-cover"
                               />
                             ) : null}
                           </div>
