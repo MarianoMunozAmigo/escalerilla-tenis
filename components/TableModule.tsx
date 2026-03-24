@@ -98,18 +98,18 @@ export default function TableModule({
                 >
                   <div className="text-center">
                     <div
-                      className={`mx-auto flex items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow ${
-                        isFirst ? "h-28 w-28" : "h-24 w-24"
+                      className={`podium-photo-shell mx-auto ${
+                        isFirst ? "h-32 w-32 md:h-36 md:w-36" : "h-28 w-28 md:h-32 md:w-32"
                       }`}
                     >
                       {player.photo_url ? (
                         <img
                           src={player.photo_url}
                           alt={player.player_name}
-                          className="h-full w-full object-contain"
+                          className="podium-photo-img"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
+                        <div className="photo-fallback">
                           Sin foto
                         </div>
                       )}
@@ -128,7 +128,10 @@ export default function TableModule({
                     </p>
 
                     <div className="mt-2 text-xs font-semibold text-slate-600">
-                      DG {player.game_difference > 0 ? `+${player.game_difference}` : player.game_difference}
+                      DG{" "}
+                      {player.game_difference > 0
+                        ? `+${player.game_difference}`
+                        : player.game_difference}
                     </div>
 
                     <div className="mt-3">
@@ -207,14 +210,16 @@ export default function TableModule({
 
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
+                          <div className="table-photo-shell">
                             {row.photo_url ? (
                               <img
                                 src={row.photo_url}
                                 alt={row.player_name}
-                                className="h-full w-full object-contain"
+                                className="table-photo-img"
                               />
-                            ) : null}
+                            ) : (
+                              <div className="photo-fallback" />
+                            )}
                           </div>
 
                           <div>

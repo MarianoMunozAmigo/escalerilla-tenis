@@ -55,3 +55,88 @@ table {
 .mobile-safe-b {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
+
+/* =========================
+   FOTOS TABLA
+   ========================= */
+
+.table-photo-shell {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 3px;
+}
+
+.table-photo-img {
+  width: 100%;
+  height: 100% !important;
+  display: block;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
+/* =========================
+   FOTOS PODIO
+   ========================= */
+
+.podium-photo-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 4px solid #ffffff;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  padding: 6px;
+}
+
+.podium-photo-img {
+  width: 100%;
+  height: 100% !important;
+  display: block;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+
+/* =========================
+   FALLBACK
+   ========================= */
+
+.photo-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.75rem;
+  text-align: center;
+  border-radius: inherit;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 768px) {
+  .table-photo-shell {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+    border-radius: 12px;
+  }
+
+  .podium-photo-shell {
+    border-radius: 20px;
+    padding: 5px;
+  }
+}
