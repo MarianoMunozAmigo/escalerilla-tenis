@@ -24,6 +24,14 @@ type RivalSummary = {
   points: number;
 };
 
+function parseStrengths(value?: string | null) {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export default async function PlayerDetailPage({ params }: PlayerPageProps) {
   const { id } = await params;
   const playerId = Number(id);
@@ -82,6 +90,8 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
   const standings = buildStandings(safePlayers, safeAllMatches);
   const currentPosition =
     standings.findIndex((row) => row.player_id === playerId) + 1;
+
+  const strengthsList = parseStrengths(safePlayer.strengths);
 
   const rivalSummaryMap = new Map<number, RivalSummary>();
 
@@ -167,6 +177,12 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
                 >
                   {safePlayer.active ? "Activo" : "Inactivo"}
                 </span>
+
+                {currentPosition > 0 && (
+                  <span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-700">
+                    Ranking #{currentPosition}
+                  </span>
+                )}
               </div>
 
               <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
@@ -204,32 +220,96 @@ export default async function PlayerDetailPage({ params }: PlayerPageProps) {
                 </div>
               </div>
 
-              <div className="mt-8 grid gap-6 lg:grid-cols-3">
-                <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5 shadow-sm">
+              <div className="mt-8 grid gap-6 xl:grid-cols-3">
+                <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5 shadow-sm xl:col-span-1">
                   <h2 className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
-                    Descripción
+                    Perfil del jugador
                   </h2>
-                  <p className="mt-3 text-sm leading-6 text-slate-700">
-                    {safePlayer.short_description || "Sin descripción breve registrada."}
-                  </p>
+
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                        Descripción
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-slate-700">
+                        {safePlayer.short_description || "Sin descripción breve registrada."}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                        Estilo de juego
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-slate-700">
+                        {safePlayer.play_style || "Sin estilo de juego registrado."}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                        Mano hábil
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-slate-700">
+                        {safePlayer.handedness || "No registrada."}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5 shadow-sm">
-                  <h2 className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
-                    Estilo de juego
-                  </h2>
-                  <p className="mt-3 text-sm leading-6 text-slate-700">
-                    {safePlayer.play_style || "Sin estilo de juego registrado."}
-                  </p>
-                </div>
-
-                <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5 shadow-sm">
+                <div className="rounded-[1.5rem] border border-slate-200 bg-white/80 p-5 shadow-sm xl:col-span-2">
                   <h2 className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
                     Fortalezas
                   </h2>
-                  <p className="mt-3 text-sm leading-6 text-slate-700">
-                    {safePlayer.strengths || "Sin fortalezas registradas."}
-                  </p>
+
+                  {strengthsList.length > 0 ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {strengthsList.map((strength) => (
+                        <span
+                          key={strength}
+                          className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-800"
+                        >
+                          {strength}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm leading-6 text-slate-700">
+                      Sin fortalezas registradas.
+                    </p>
+                  )}
+
+                  <div className="mt-6 grid gap-4 md:grid-cols-3">
+                    <div className="rounded-2xl bg-slate-50 p-4">
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                        Mejor atributo
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-slate-800">
+                        {strengthsList[0] || "No registrado"}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl bg-slate-50 p-4">
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                        Perfil
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-slate-800">
+                        {safePlayer.play_style
+                          ? "Definido"
+                          : "Pendiente de completar"}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl bg-slate-50 p-4">
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                        Estado de ficha
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-slate-800">
+                        {safePlayer.short_description || safePlayer.play_style || safePlayer.strengths
+                          ? "Con información"
+                          : "Sin completar"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
