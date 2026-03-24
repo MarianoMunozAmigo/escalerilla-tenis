@@ -109,9 +109,7 @@ export default function TableModule({
                           className="podium-photo-img"
                         />
                       ) : (
-                        <div className="photo-fallback">
-                          Sin foto
-                        </div>
+                        <div className="photo-fallback">Sin foto</div>
                       )}
                     </div>
 
