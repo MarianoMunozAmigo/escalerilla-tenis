@@ -56,15 +56,58 @@ table {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
+/* UTILIDADES VISUALES */
+.tennis-stat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.96) 100%);
+  padding: 1.25rem;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+.tennis-stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #22d3ee 0%, #34d399 50%, #facc15 100%);
+}
+
+.tennis-hero-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  padding: 1.25rem;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.tennis-hero-card::after {
+  content: "";
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  width: 110px;
+  height: 110px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.18) 0%, rgba(34, 211, 238, 0) 70%);
+}
+
 /* TABLA */
 .table-photo-shell {
   width: 48px;
   height: 48px;
   flex: 0 0 48px;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid #e2e8f0;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
 }
 
 .table-photo-img {
@@ -78,10 +121,10 @@ table {
 /* PODIO */
 .podium-photo-shell {
   overflow: hidden;
-  border-radius: 24px;
-  border: 4px solid #ffffff;
-  background: #ffffff;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  border-radius: 28px;
+  border: 5px solid #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.1);
 }
 
 .podium-photo-img {
@@ -92,6 +135,19 @@ table {
   object-position: center 20% !important;
 }
 
+/* FOTO HERO JUGADOR */
+.player-hero-photo {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  border-radius: 2rem;
+  object-fit: cover;
+  object-position: center 18%;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+  border: 6px solid rgba(255, 255, 255, 0.9);
+  background: #ffffff;
+}
+
 /* FALLBACK */
 .photo-fallback {
   width: 100%;
@@ -99,21 +155,41 @@ table {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8fafc;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
   color: #64748b;
   font-size: 0.75rem;
   text-align: center;
 }
 
+/* TABLAS */
+thead th {
+  white-space: nowrap;
+}
+
+tbody td {
+  vertical-align: middle;
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .table-photo-shell {
     width: 44px;
     height: 44px;
     flex-basis: 44px;
-    border-radius: 12px;
+    border-radius: 14px;
   }
 
   .podium-photo-shell {
-    border-radius: 20px;
+    border-radius: 22px;
+  }
+
+  .player-hero-photo {
+    max-height: 420px;
+    border-radius: 1.6rem;
+  }
+
+  .tennis-stat-card,
+  .tennis-hero-card {
+    border-radius: 1.35rem;
   }
 }
