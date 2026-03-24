@@ -193,3 +193,14 @@ tbody td {
     border-radius: 1.35rem;
   }
 }
+.player-card-photo {
+  display: block;
+  width: 100%;
+  max-height: 100%;
+  border-radius: 1.5rem;
+  object-fit: cover;
+  object-position: center 20%;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+  border: 5px solid rgba(255, 255, 255, 0.92);
+  background: #ffffff;
+}

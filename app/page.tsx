@@ -14,24 +14,28 @@ const modules = [
     description: "Consulta la clasificación general, el podio y el rendimiento reciente.",
     href: "/tabla",
     color: "from-cyan-400 via-sky-400 to-blue-500",
+    icon: "🏆",
   },
   {
     title: "Jugadores",
     description: "Revisa perfiles, fotografías, estadísticas y estilo de juego.",
     href: "/jugadores",
     color: "from-emerald-400 via-lime-400 to-green-500",
+    icon: "🎾",
   },
   {
     title: "Enfrentamientos",
     description: "Controla los cruces disponibles y el avance entre rivales.",
     href: "/enfrentamientos",
     color: "from-yellow-300 via-amber-400 to-orange-500",
+    icon: "🤝",
   },
   {
     title: "Partidos",
     description: "Explora todos los partidos registrados y sus resultados.",
     href: "/partidos",
     color: "from-orange-400 via-red-400 to-pink-500",
+    icon: "📋",
   },
 ];
 
@@ -46,6 +50,13 @@ function getPositionBadge(position: number) {
   if (position === 2) return "🥈";
   if (position === 3) return "🥉";
   return `#${position}`;
+}
+
+function getTopPill(position: number) {
+  if (position === 1) return "bg-yellow-400 text-slate-900";
+  if (position === 2) return "bg-slate-800 text-white";
+  if (position === 3) return "bg-amber-500 text-white";
+  return "bg-slate-900 text-white";
 }
 
 export default async function Home() {
@@ -108,6 +119,7 @@ export default async function Home() {
   }
 
   const recentMatches = safeMatches.slice(0, 5);
+  const leader = topThree[0] ? playerMap.get(topThree[0].player_id) : null;
 
   return (
     <main className="relative min-h-screen overflow-hidden text-white">
@@ -119,14 +131,14 @@ export default async function Home() {
       />
 
       <div className="absolute inset-0 bg-gradient-to-br from-cyan-950/80 via-emerald-950/65 to-orange-950/80" />
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-black/25" />
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-4 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-28">
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
+        <section className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr] lg:gap-8">
           <div>
-            <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold backdrop-blur sm:px-4 sm:text-sm">
+            <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] backdrop-blur sm:text-sm">
               <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-400" />
-              3° Edición · Dashboard oficial
+              3° edición · dashboard oficial
             </div>
 
             <h1 className="mt-5 max-w-4xl text-4xl font-black uppercase leading-[0.95] tracking-tight sm:text-5xl md:text-7xl">
@@ -138,7 +150,8 @@ export default async function Home() {
 
             <p className="mt-5 max-w-2xl text-base leading-7 text-white/90 sm:text-lg sm:leading-8 md:text-xl">
               Centro principal de seguimiento de la escalerilla, con clasificación
-              actual, últimos resultados y control general del avance de la competencia.
+              actual, perfiles de jugadores, actividad reciente y control del avance
+              de la competencia.
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
@@ -150,30 +163,30 @@ export default async function Home() {
               </Link>
 
               <Link
-                href="/partidos"
+                href="/jugadores"
                 className="rounded-2xl border border-white/25 bg-white/10 px-6 py-3 text-center text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
               >
-                Ver últimos partidos
+                Ver jugadores
               </Link>
             </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur sm:p-5">
+              <div className="rounded-[1.6rem] border border-white/15 bg-white/10 p-4 backdrop-blur sm:p-5">
                 <p className="text-sm text-white/75">Jugadores</p>
                 <p className="mt-2 text-2xl font-black sm:text-3xl">{totalPlayers}</p>
               </div>
 
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur sm:p-5">
+              <div className="rounded-[1.6rem] border border-white/15 bg-white/10 p-4 backdrop-blur sm:p-5">
                 <p className="text-sm text-white/75">Partidos jugados</p>
                 <p className="mt-2 text-2xl font-black sm:text-3xl">{totalMatches}</p>
               </div>
 
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur sm:p-5">
-                <p className="text-sm text-white/75">Partidos pendientes</p>
+              <div className="rounded-[1.6rem] border border-white/15 bg-white/10 p-4 backdrop-blur sm:p-5">
+                <p className="text-sm text-white/75">Pendientes</p>
                 <p className="mt-2 text-2xl font-black sm:text-3xl">{totalPendingMatches}</p>
               </div>
 
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur sm:p-5">
+              <div className="rounded-[1.6rem] border border-white/15 bg-white/10 p-4 backdrop-blur sm:p-5">
                 <p className="text-sm text-white/75">Avance</p>
                 <p className="mt-2 text-2xl font-black sm:text-3xl">{completionPercentage}%</p>
               </div>
@@ -181,11 +194,11 @@ export default async function Home() {
 
             <div className="mt-8 rounded-[2rem] border border-white/15 bg-white/10 p-5 backdrop-blur sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70 sm:text-sm">
+                <div className="min-w-0">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-white/70 sm:text-sm">
                     Líder actual
                   </p>
-                  <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+                  <h2 className="mt-2 truncate text-2xl font-black sm:text-3xl">
                     {topThree[0]?.player_name || "Sin datos"}
                   </h2>
                   <p className="mt-1 text-sm text-white/80 sm:text-base">
@@ -193,12 +206,15 @@ export default async function Home() {
                   </p>
                 </div>
 
-                <Link
-                  href="/jugadores"
-                  className="rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-white/20"
-                >
-                  Ver jugadores
-                </Link>
+                {leader?.photo_url && (
+                  <div className="hidden h-20 w-20 overflow-hidden rounded-3xl border border-white/20 bg-white/10 sm:flex">
+                    <img
+                      src={leader.photo_url}
+                      alt={leader.name}
+                      className="h-full w-full object-cover object-[center_20%]"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -216,12 +232,14 @@ export default async function Home() {
                 <Link
                   key={module.href}
                   href={module.href}
-                  className="group rounded-2xl border border-white/10 bg-black/10 p-4 transition hover:bg-white/10"
+                  className="group rounded-[1.6rem] border border-white/10 bg-black/10 p-4 transition hover:bg-white/10"
                 >
                   <div className="flex items-start gap-3 sm:gap-4">
                     <div
-                      className={`h-11 w-11 shrink-0 rounded-2xl bg-gradient-to-br ${module.color} shadow-lg sm:h-12 sm:w-12`}
-                    />
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${module.color} text-xl shadow-lg`}
+                    >
+                      {module.icon}
+                    </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
@@ -269,19 +287,23 @@ export default async function Home() {
                   <Link
                     key={player.player_id}
                     href={`/jugadores/${player.player_id}`}
-                    className="group rounded-2xl border border-white/10 bg-black/10 p-4 transition hover:bg-white/10"
+                    className="group rounded-[1.6rem] border border-white/10 bg-black/10 p-4 transition hover:bg-white/10"
                   >
                     <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-xl shadow sm:h-14 sm:w-14 sm:text-2xl">
+                      <div
+                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl shadow sm:h-14 sm:w-14 sm:text-2xl ${getTopPill(
+                          position
+                        )}`}
+                      >
                         {getPositionBadge(position)}
                       </div>
 
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 sm:h-14 sm:w-14">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/10 sm:h-14 sm:w-14">
                         {fullPlayer?.photo_url ? (
                           <img
                             src={fullPlayer.photo_url}
                             alt={player.player_name}
-                            className="h-full w-full object-contain p-1"
+                            className="h-full w-full object-cover object-[center_20%]"
                           />
                         ) : null}
                       </div>
@@ -332,7 +354,7 @@ export default async function Home() {
                   return (
                     <article
                       key={match.id}
-                      className="rounded-2xl border border-white/10 bg-black/10 p-4"
+                      className="rounded-[1.6rem] border border-white/10 bg-black/10 p-4"
                     >
                       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                         <h3 className="text-sm font-black sm:text-base">
@@ -356,7 +378,7 @@ export default async function Home() {
                   );
                 })
               ) : (
-                <div className="rounded-2xl border border-white/10 bg-black/10 p-6 text-white/75">
+                <div className="rounded-[1.6rem] border border-white/10 bg-black/10 p-6 text-white/75">
                   Aún no hay partidos registrados.
                 </div>
               )}
