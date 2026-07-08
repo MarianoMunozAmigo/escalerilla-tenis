@@ -10,6 +10,7 @@ const links = [
   { href: "/jugadores", label: "Jugadores" },
   { href: "/enfrentamientos", label: "Enfrentamientos" },
   { href: "/partidos", label: "Partidos" },
+  { href: "/fase-final", label: "Fase Final" },
 ];
 
 export default function MainNav() {
