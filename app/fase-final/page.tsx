@@ -952,7 +952,9 @@ export default async function FaseFinalPage() {
         .qualy-bracket-wrap,
         .bracket-wrap {
           overflow-x: auto;
+          overflow-y: hidden;
           padding: 12px 0 24px;
+          -webkit-overflow-scrolling: touch;
         }
 
         .qualy-bracket-wrap::-webkit-scrollbar,
@@ -1290,6 +1292,7 @@ export default async function FaseFinalPage() {
           }
 
           .hero {
+            grid-template-columns: 1fr;
             padding: 24px;
             border-radius: 26px;
           }
@@ -1308,50 +1311,60 @@ export default async function FaseFinalPage() {
 
           .qualy-bracket-wrap,
           .bracket-wrap {
-            overflow-x: visible;
-            padding: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 12px 0 24px;
+            -webkit-overflow-scrolling: touch;
           }
 
-          .qualy-rounds-header,
-          .rounds-header {
-            display: none;
-          }
-
-          .qualy-canvas,
-          .bracket-canvas {
-            min-width: 0;
+          .qualy-rounds-header {
+            min-width: 1580px;
             display: grid;
-            grid-template-columns: 1fr;
-            grid-template-rows: none;
-            gap: 16px;
+            grid-template-columns: 360px 140px 360px 140px 320px;
           }
 
-          .qualy-canvas > *,
-          .bracket-canvas > * {
-            grid-column: auto !important;
-            grid-row: auto !important;
+          .rounds-header {
+            min-width: 1420px;
+            display: grid;
+            grid-template-columns: 330px 120px 330px 120px 330px 120px 230px;
           }
 
-          .qualy-canvas .match-card,
-          .bracket-canvas .match-card,
-          .advance-card,
-          .champion-card {
-            width: 100%;
-            max-width: none;
+          .qualy-canvas {
+            min-width: 1580px;
+            display: grid;
+            grid-template-columns: 360px 140px 360px 140px 320px;
+            grid-template-rows: repeat(8, 170px);
+          }
+
+          .bracket-canvas {
+            min-width: 1420px;
+            display: grid;
+            grid-template-columns: 330px 120px 330px 120px 330px 120px 230px;
+            grid-template-rows: repeat(8, 165px);
+          }
+
+          .qualy-canvas .match-card {
+            max-width: 360px;
           }
 
           .bracket-line {
-            display: none;
+            display: block;
           }
 
-          .qualy-section .qualy-match::before,
-          .qualy-section .qualy-semi::before,
-          .bracket-section .match-card::before {
-            opacity: 0.75;
+          .bracket-line.h {
+            height: 2px;
+            align-self: center;
+            justify-self: stretch;
+          }
+
+          .bracket-line.v {
+            width: 2px;
+            justify-self: center;
+            align-self: center;
           }
 
           .advance-card {
-            min-height: auto;
+            min-height: 120px;
           }
         }
 
@@ -1417,63 +1430,6 @@ export default async function FaseFinalPage() {
 
           .section-title p {
             font-size: 0.92rem;
-          }
-
-          .match-card {
-            padding: 13px;
-            border-radius: 20px;
-          }
-
-          .match-heading {
-            align-items: flex-start;
-            flex-direction: column;
-            gap: 4px;
-          }
-
-          .match-heading h3 {
-            font-size: 0.96rem;
-            white-space: normal;
-          }
-
-          .player-slot {
-            grid-template-columns: 50px 1fr;
-            min-height: 64px;
-            gap: 10px;
-            padding: 8px;
-            border-radius: 15px;
-          }
-
-          .photo-shell {
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
-          }
-
-          .player-info strong {
-            font-size: 0.92rem;
-          }
-
-          .player-info small {
-            font-size: 0.72rem;
-          }
-
-          .slot-label {
-            font-size: 0.6rem;
-          }
-
-          .advance-card {
-            grid-template-columns: 38px 1fr;
-            padding: 15px;
-            border-radius: 20px;
-          }
-
-          .advance-icon {
-            width: 38px;
-            height: 38px;
-          }
-
-          .champion-card {
-            min-height: 170px;
           }
         }
       `}</style>
