@@ -8,98 +8,17 @@ import { buildStandings } from "../../lib/standings";
 import type { Player } from "../../types/player";
 import type { Match } from "../../types/match";
 import type { Standing } from "../../types/standing";
-
-type BracketPlayer = Standing & {
-  photo_url?: string | null;
-  display_name?: string;
-  seed?: number;
-};
-
-type RawRecord = Record<string, unknown>;
-
-function asRecord(value: unknown): RawRecord {
-  return value && typeof value === "object" ? (value as RawRecord) : {};
-}
-
-function getTextValue(source: unknown, keys: string[]): string {
-  const row = asRecord(source);
-
-  for (const key of keys) {
-    const value = row[key];
-
-    if (typeof value === "string" && value.trim()) {
-      return value.trim();
-    }
-
-    if (typeof value === "number") {
-      return String(value);
-    }
-  }
-
-  return "";
-}
-
-function getNumberValue(source: unknown, keys: string[]): number | null {
-  const row = asRecord(source);
-
-  for (const key of keys) {
-    const value = row[key];
-
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return value;
-    }
-
-    if (typeof value === "string" && value.trim()) {
-      const parsed = Number(value.replace(",", "."));
-      if (Number.isFinite(parsed)) return parsed;
-    }
-  }
-
-  return null;
-}
-
-function getEntityId(source: unknown): string {
-  return getTextValue(source, ["player_id", "playerId", "jugador_id", "id"]);
-}
-
-function getDisplayName(source?: unknown, fallback = ""): string {
-  const directName = getTextValue(source, [
-    "display_name",
-    "name",
-    "nombre",
-    "player_name",
-    "nombre_completo",
-  ]);
-
-  if (directName) return directName;
-
-  const nombres = getTextValue(source, ["nombres", "first_name"]);
-  const apellidoPaterno = getTextValue(source, [
-    "apellido_paterno",
-    "last_name",
-    "apellido",
-  ]);
-  const apellidoMaterno = getTextValue(source, ["apellido_materno"]);
-
-  const fullName = [nombres, apellidoPaterno, apellidoMaterno]
-    .filter(Boolean)
-    .join(" ")
-    .trim();
-
-  return fullName || fallback;
-}
-
-function getPhotoUrl(source?: unknown): string | null {
-  const photo = getTextValue(source, [
-    "photo_url",
-    "foto_url",
-    "avatar_url",
-    "image_url",
-    "imagen_url",
-  ]);
-
-  return photo || null;
-}
+import {
+  buildFinalBracketPlayers,
+  FINAL_MATCH_SEED_ROWS,
+  getFinalMatch,
+  getNumberValue,
+  getPlayerName,
+  resolveFinalMatches,
+  type BracketPlayer,
+  type FinalMatchResolved,
+  type FinalMatchRow,
+} from "../../lib/finalBracket";
 
 function getInitials(name: string): string {
   const clean = name.trim();
@@ -134,37 +53,6 @@ function getPlayerMeta(player: BracketPlayer): string {
   return items.length ? items.join(" · ") : "Clasificado";
 }
 
-function buildBracketPlayers(
-  standings: Standing[],
-  players: Player[]
-): BracketPlayer[] {
-  const playerById = new Map<string, Player>();
-
-  players.forEach((player) => {
-    const id = getEntityId(player);
-    if (id) playerById.set(id, player);
-  });
-
-  return standings.map((standing, index) => {
-    const standingId = getEntityId(standing);
-    const playerRow = standingId ? playerById.get(standingId) : undefined;
-
-    const displayName =
-      getDisplayName(standing) ||
-      getDisplayName(playerRow) ||
-      `Jugador ${index + 1}`;
-
-    const photoUrl = getPhotoUrl(standing) || getPhotoUrl(playerRow);
-
-    return {
-      ...standing,
-      display_name: displayName,
-      photo_url: photoUrl,
-      seed: index + 1,
-    } as BracketPlayer;
-  });
-}
-
 function PlayerSlot({
   player,
   label,
@@ -174,13 +62,8 @@ function PlayerSlot({
   label?: string;
   placeholder?: string;
 }) {
-  const name = player
-    ? player.display_name || getDisplayName(player, "Jugador")
-    : placeholder;
-
-  const photoUrl = player?.photo_url || getPhotoUrl(player);
-  const slotLabel =
-    label || (player?.seed ? `${player.seed}° lugar` : "Pendiente");
+  const name = player ? getPlayerName(player) : placeholder;
+  const photoUrl = player?.photo_url ?? null;
 
   return (
     <div className={`player-slot ${!player ? "is-placeholder" : ""}`}>
@@ -193,7 +76,10 @@ function PlayerSlot({
       </div>
 
       <div className="player-info">
-        <span className="slot-label">{slotLabel}</span>
+        <span className="slot-label">
+          {label ||
+            (player?.seed ? `${player.seed}° fase regular` : "Pendiente")}
+        </span>
         <strong>{name}</strong>
         <small>{player ? getPlayerMeta(player) : "Esperando resultado"}</small>
       </div>
@@ -201,13 +87,27 @@ function PlayerSlot({
   );
 }
 
+function MatchResult({ match }: { match?: FinalMatchResolved }) {
+  if (!match?.winner) return null;
+
+  return (
+    <div className="match-result">
+      <span>Ganador</span>
+      <strong>{getPlayerName(match.winner)}</strong>
+      {match.score_text && <small>{match.score_text}</small>}
+    </div>
+  );
+}
+
 function MatchCard({
+  match,
   title,
   eyebrow,
   top,
   bottom,
   className = "",
 }: {
+  match?: FinalMatchResolved;
   title: string;
   eyebrow?: string;
   top: ReactNode;
@@ -215,7 +115,9 @@ function MatchCard({
   className?: string;
 }) {
   return (
-    <article className={`match-card ${className}`}>
+    <article
+      className={`match-card ${className} ${match?.winner ? "is-played" : ""}`}
+    >
       <div className="match-heading">
         <span>{eyebrow}</span>
         <h3>{title}</h3>
@@ -226,31 +128,56 @@ function MatchCard({
         <div className="versus">vs</div>
         {bottom}
       </div>
+
+      <MatchResult match={match} />
     </article>
   );
 }
 
 function AdvanceCard({
+  match,
   title,
   eyebrow,
   placeholder,
   className = "",
 }: {
+  match?: FinalMatchResolved;
   title: string;
   eyebrow: string;
   placeholder: string;
   className?: string;
 }) {
   return (
-    <article className={`advance-card ${className}`}>
+    <article
+      className={`advance-card ${className} ${match?.winner ? "is-played" : ""}`}
+    >
       <div className="advance-icon">✓</div>
 
       <div className="advance-info">
         <span>{eyebrow}</span>
-        <strong>{title}</strong>
-        <small>{placeholder}</small>
+        <strong>{match?.winner ? getPlayerName(match.winner) : title}</strong>
+        <small>{match?.winner ? "Clasificado confirmado" : placeholder}</small>
       </div>
     </article>
+  );
+}
+
+function ChampionCard({ finalMatch }: { finalMatch?: FinalMatchResolved }) {
+  return (
+    <div
+      className={`champion-card champion ${
+        finalMatch?.winner ? "is-played" : ""
+      }`}
+    >
+      <span>Campeón</span>
+      <div className="trophy">🏆</div>
+      <strong>
+        {finalMatch?.winner ? getPlayerName(finalMatch.winner) : "Por definir"}
+      </strong>
+      <small>
+        {finalMatch?.winner ? "Campeón confirmado" : "Ganador de la final"}
+      </small>
+    </div>
   );
 }
 
@@ -270,9 +197,14 @@ export default async function FaseFinalPage() {
   const [
     { data: playersData, error: playersError },
     { data: matchesData, error: matchesError },
+    { data: finalMatchesData, error: finalMatchesError },
   ] = await Promise.all([
     supabase.from("players").select("*"),
     supabase.from("matches").select("*"),
+    supabase
+      .from("final_matches")
+      .select("*")
+      .order("order_index", { ascending: true }),
   ]);
 
   if (playersError) {
@@ -283,13 +215,39 @@ export default async function FaseFinalPage() {
     return <ErrorState message={matchesError.message} />;
   }
 
+  if (finalMatchesError) {
+    return <ErrorState message={finalMatchesError.message} />;
+  }
+
   const players = (playersData ?? []) as Player[];
   const matches = (matchesData ?? []) as Match[];
+  const finalRows =
+    finalMatchesData && finalMatchesData.length > 0
+      ? ((finalMatchesData ?? []) as FinalMatchRow[])
+      : FINAL_MATCH_SEED_ROWS;
 
   const standings = buildStandings(players, matches) as Standing[];
-  const bracketPlayers = buildBracketPlayers(standings, players);
+  const bracketPlayers = buildFinalBracketPlayers(standings, players);
+  const finalMatches = resolveFinalMatches(bracketPlayers, finalRows);
 
   const seed = (position: number) => bracketPlayers[position - 1];
+  const match = (key: string) => getFinalMatch(finalMatches, key);
+
+  const qualy1 = match("qualy_1");
+  const qualy2 = match("qualy_2");
+  const qualy3 = match("qualy_3");
+  const qualy4 = match("qualy_4");
+  const qualyA = match("qualy_a");
+  const qualyB = match("qualy_b");
+
+  const qf1 = match("qf_1");
+  const qf2 = match("qf_2");
+  const qf3 = match("qf_3");
+  const qf4 = match("qf_4");
+
+  const sf1 = match("sf_1");
+  const sf2 = match("sf_2");
+  const finalMatch = match("final");
 
   const directCount = bracketPlayers.slice(0, 6).filter(Boolean).length;
   const qualyCount = bracketPlayers.slice(6, 14).filter(Boolean).length;
@@ -352,6 +310,7 @@ export default async function FaseFinalPage() {
 
           <div className="qualy-canvas">
             <MatchCard
+              match={qualy1}
               className="qualy-match qm1"
               title="Qualy 1"
               eyebrow="7° vs 14°"
@@ -360,6 +319,7 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={qualy2}
               className="qualy-match qm2"
               title="Qualy 2"
               eyebrow="8° vs 13°"
@@ -368,6 +328,7 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={qualy3}
               className="qualy-match qm3"
               title="Qualy 3"
               eyebrow="9° vs 12°"
@@ -376,6 +337,7 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={qualy4}
               className="qualy-match qm4"
               title="Qualy 4"
               eyebrow="10° vs 11°"
@@ -384,35 +346,41 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={qualyA}
               className="qualy-semi qs1"
               title="Semifinal Qualy A"
               eyebrow="Camino al 1°"
               top={
                 <PlayerSlot
-                  label="Desde Qualy 2"
-                  placeholder="Ganador Qualy 2"
-                />
-              }
-              bottom={
-                <PlayerSlot
-                  label="Desde Qualy 3"
-                  placeholder="Ganador Qualy 3"
-                />
-              }
-            />
-
-            <MatchCard
-              className="qualy-semi qs2"
-              title="Semifinal Qualy B"
-              eyebrow="Camino al 2°"
-              top={
-                <PlayerSlot
+                  player={qualyA?.player1}
                   label="Desde Qualy 1"
                   placeholder="Ganador Qualy 1"
                 />
               }
               bottom={
                 <PlayerSlot
+                  player={qualyA?.player2}
+                  label="Desde Qualy 2"
+                  placeholder="Ganador Qualy 2"
+                />
+              }
+            />
+
+            <MatchCard
+              match={qualyB}
+              className="qualy-semi qs2"
+              title="Semifinal Qualy B"
+              eyebrow="Camino al 2°"
+              top={
+                <PlayerSlot
+                  player={qualyB?.player1}
+                  label="Desde Qualy 3"
+                  placeholder="Ganador Qualy 3"
+                />
+              }
+              bottom={
+                <PlayerSlot
+                  player={qualyB?.player2}
                   label="Desde Qualy 4"
                   placeholder="Ganador Qualy 4"
                 />
@@ -420,6 +388,7 @@ export default async function FaseFinalPage() {
             />
 
             <AdvanceCard
+              match={qualyA}
               className="qa1"
               eyebrow="Clasificado Qualy A"
               title="A cuartos de final"
@@ -427,6 +396,7 @@ export default async function FaseFinalPage() {
             />
 
             <AdvanceCard
+              match={qualyB}
               className="qa2"
               eyebrow="Clasificado Qualy B"
               title="A cuartos de final"
@@ -470,12 +440,14 @@ export default async function FaseFinalPage() {
 
           <div className="bracket-canvas">
             <MatchCard
+              match={qf1}
               className="qf1"
               title="Cuarto 1"
               eyebrow="Llave superior"
               top={<PlayerSlot player={seed(1)} label="1° fase regular" />}
               bottom={
                 <PlayerSlot
+                  player={qf1?.player2}
                   label="Desde Qualy"
                   placeholder="Clasificado Qualy A"
                 />
@@ -483,6 +455,7 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={qf2}
               className="qf2"
               title="Cuarto 2"
               eyebrow="Llave superior"
@@ -491,6 +464,7 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={qf3}
               className="qf3"
               title="Cuarto 3"
               eyebrow="Llave inferior"
@@ -499,12 +473,14 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={qf4}
               className="qf4"
               title="Cuarto 4"
               eyebrow="Llave inferior"
               top={<PlayerSlot player={seed(2)} label="2° fase regular" />}
               bottom={
                 <PlayerSlot
+                  player={qf4?.player2}
                   label="Desde Qualy"
                   placeholder="Clasificado Qualy B"
                 />
@@ -512,17 +488,20 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={sf1}
               className="sf1"
               title="Semifinal 1"
               eyebrow="Llave superior"
               top={
                 <PlayerSlot
+                  player={sf1?.player1}
                   label="Cuartos de final"
                   placeholder="Ganador Cuarto 1"
                 />
               }
               bottom={
                 <PlayerSlot
+                  player={sf1?.player2}
                   label="Cuartos de final"
                   placeholder="Ganador Cuarto 2"
                 />
@@ -530,17 +509,20 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={sf2}
               className="sf2"
               title="Semifinal 2"
               eyebrow="Llave inferior"
               top={
                 <PlayerSlot
+                  player={sf2?.player1}
                   label="Cuartos de final"
                   placeholder="Ganador Cuarto 3"
                 />
               }
               bottom={
                 <PlayerSlot
+                  player={sf2?.player2}
                   label="Cuartos de final"
                   placeholder="Ganador Cuarto 4"
                 />
@@ -548,29 +530,27 @@ export default async function FaseFinalPage() {
             />
 
             <MatchCard
+              match={finalMatch}
               className="final"
               title="Final"
               eyebrow="Partido decisivo"
               top={
                 <PlayerSlot
+                  player={finalMatch?.player1}
                   label="Semifinal"
                   placeholder="Ganador Semifinal 1"
                 />
               }
               bottom={
                 <PlayerSlot
+                  player={finalMatch?.player2}
                   label="Semifinal"
                   placeholder="Ganador Semifinal 2"
                 />
               }
             />
 
-            <div className="champion-card champion">
-              <span>Campeón</span>
-              <div className="trophy">🏆</div>
-              <strong>Por definir</strong>
-              <small>Ganador de la final</small>
-            </div>
+            <ChampionCard finalMatch={finalMatch} />
 
             <div className="bracket-line h qf1-h" />
             <div className="bracket-line h qf2-h" />
@@ -758,7 +738,8 @@ export default async function FaseFinalPage() {
         .round-title,
         .qualy-round-title,
         .advance-info span,
-        .champion-card span {
+        .champion-card span,
+        .match-result span {
           text-transform: uppercase;
           letter-spacing: 0.13em;
           font-size: 0.7rem;
@@ -820,6 +801,10 @@ export default async function FaseFinalPage() {
             linear-gradient(180deg, rgba(24, 47, 52, 0.98), rgba(15, 31, 35, 0.98));
           border: 1px solid var(--border-medium);
           box-shadow: var(--shadow-card);
+        }
+
+        .match-card.is-played {
+          border-color: rgba(214, 178, 94, 0.42);
         }
 
         .match-card::before {
@@ -949,6 +934,27 @@ export default async function FaseFinalPage() {
           color: rgba(246, 232, 196, 0.88);
         }
 
+        .match-result {
+          position: relative;
+          margin-top: 11px;
+          padding: 10px 11px;
+          border-radius: 15px;
+          background: rgba(214, 178, 94, 0.1);
+          border: 1px solid rgba(214, 178, 94, 0.2);
+          display: grid;
+          gap: 2px;
+        }
+
+        .match-result strong {
+          color: #ffffff;
+          font-size: 0.92rem;
+        }
+
+        .match-result small {
+          color: var(--text-muted);
+          font-size: 0.76rem;
+        }
+
         .qualy-bracket-wrap,
         .bracket-wrap {
           overflow-x: auto;
@@ -991,7 +997,7 @@ export default async function FaseFinalPage() {
           min-width: 1580px;
           display: grid;
           grid-template-columns: 360px 140px 360px 140px 320px;
-          grid-template-rows: repeat(8, 170px);
+          grid-template-rows: repeat(8, 190px);
           align-items: center;
         }
 
@@ -1026,6 +1032,11 @@ export default async function FaseFinalPage() {
             linear-gradient(180deg, rgba(16, 36, 40, 0.98), rgba(11, 24, 27, 0.98));
           border: 1px solid rgba(214, 178, 94, 0.28);
           box-shadow: var(--shadow-card);
+        }
+
+        .advance-card.is-played {
+          background:
+            linear-gradient(180deg, rgba(214, 178, 94, 0.14), rgba(11, 24, 27, 0.98));
         }
 
         .qa1 { grid-column: 5; grid-row: 2 / 4; }
@@ -1088,7 +1099,7 @@ export default async function FaseFinalPage() {
         .q-a-v {
           grid-column: 2;
           grid-row: 1 / 5;
-          height: 340px;
+          height: 380px;
         }
 
         .q-a-mid {
@@ -1102,7 +1113,7 @@ export default async function FaseFinalPage() {
         .q-b-v {
           grid-column: 2;
           grid-row: 5 / 9;
-          height: 340px;
+          height: 380px;
         }
 
         .q-b-mid {
@@ -1143,7 +1154,7 @@ export default async function FaseFinalPage() {
           min-width: 1420px;
           display: grid;
           grid-template-columns: 330px 120px 330px 120px 330px 120px 230px;
-          grid-template-rows: repeat(8, 165px);
+          grid-template-rows: repeat(8, 190px);
           align-items: center;
         }
 
@@ -1182,6 +1193,12 @@ export default async function FaseFinalPage() {
           box-shadow: var(--shadow-card);
         }
 
+        .champion-card.is-played {
+          background:
+            radial-gradient(circle at 50% 0%, rgba(214, 178, 94, 0.32), transparent 62%),
+            #102428;
+        }
+
         .champion-card .trophy {
           margin: 8px 0 6px;
           font-size: 2.45rem;
@@ -1204,7 +1221,7 @@ export default async function FaseFinalPage() {
         .sf1-v {
           grid-column: 2;
           grid-row: 1 / 5;
-          height: 330px;
+          height: 380px;
         }
 
         .sf1-mid-h {
@@ -1218,7 +1235,7 @@ export default async function FaseFinalPage() {
         .sf2-v {
           grid-column: 2;
           grid-row: 5 / 9;
-          height: 330px;
+          height: 380px;
         }
 
         .sf2-mid-h {
@@ -1232,7 +1249,7 @@ export default async function FaseFinalPage() {
         .final-v {
           grid-column: 4;
           grid-row: 2 / 8;
-          height: 660px;
+          height: 760px;
         }
 
         .final-mid-h {
@@ -1315,56 +1332,6 @@ export default async function FaseFinalPage() {
             overflow-y: hidden;
             padding: 12px 0 24px;
             -webkit-overflow-scrolling: touch;
-          }
-
-          .qualy-rounds-header {
-            min-width: 1580px;
-            display: grid;
-            grid-template-columns: 360px 140px 360px 140px 320px;
-          }
-
-          .rounds-header {
-            min-width: 1420px;
-            display: grid;
-            grid-template-columns: 330px 120px 330px 120px 330px 120px 230px;
-          }
-
-          .qualy-canvas {
-            min-width: 1580px;
-            display: grid;
-            grid-template-columns: 360px 140px 360px 140px 320px;
-            grid-template-rows: repeat(8, 170px);
-          }
-
-          .bracket-canvas {
-            min-width: 1420px;
-            display: grid;
-            grid-template-columns: 330px 120px 330px 120px 330px 120px 230px;
-            grid-template-rows: repeat(8, 165px);
-          }
-
-          .qualy-canvas .match-card {
-            max-width: 360px;
-          }
-
-          .bracket-line {
-            display: block;
-          }
-
-          .bracket-line.h {
-            height: 2px;
-            align-self: center;
-            justify-self: stretch;
-          }
-
-          .bracket-line.v {
-            width: 2px;
-            justify-self: center;
-            align-self: center;
-          }
-
-          .advance-card {
-            min-height: 120px;
           }
         }
 
