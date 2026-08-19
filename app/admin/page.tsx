@@ -152,4 +152,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       </div>
     </main>
   );
+  <Link href="/admin/fase-final" className="admin-card">
+  <span>🏆</span>
+  <strong>Reportar resultados etapa final</strong>
+  <small>Qualy, cuartos, semifinales y final</small>
+</Link>
 }
