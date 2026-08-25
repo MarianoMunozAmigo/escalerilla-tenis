@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { supabase } from "../../../lib/supabase";
+import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 import { FINAL_MATCH_SEED_ROWS } from "../../../lib/finalBracket";
 
 export async function inicializarFaseFinal() {
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("final_matches")
     .upsert(FINAL_MATCH_SEED_ROWS, {
       onConflict: "match_key",
@@ -17,6 +17,7 @@ export async function inicializarFaseFinal() {
 
   revalidatePath("/admin/fase-final");
   revalidatePath("/fase-final");
+  revalidatePath("/fase-final/compartir");
 }
 
 export async function reportarResultadoFaseFinal(formData: FormData) {
@@ -33,7 +34,7 @@ export async function reportarResultadoFaseFinal(formData: FormData) {
     throw new Error("Debes seleccionar un ganador.");
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("final_matches")
     .update({
       winner_player_id: winnerPlayerId,
@@ -51,6 +52,7 @@ export async function reportarResultadoFaseFinal(formData: FormData) {
 
   revalidatePath("/admin/fase-final");
   revalidatePath("/fase-final");
+  revalidatePath("/fase-final/compartir");
 }
 
 export async function limpiarResultadoFaseFinal(formData: FormData) {
@@ -60,7 +62,7 @@ export async function limpiarResultadoFaseFinal(formData: FormData) {
     throw new Error("No se recibió el identificador del partido.");
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("final_matches")
     .update({
       winner_player_id: null,
@@ -78,4 +80,5 @@ export async function limpiarResultadoFaseFinal(formData: FormData) {
 
   revalidatePath("/admin/fase-final");
   revalidatePath("/fase-final");
-  }
+  revalidatePath("/fase-final/compartir");
+}
