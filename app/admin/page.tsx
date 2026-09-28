@@ -54,14 +54,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           description={`Panel de registro y gestión de resultados. Edición activa: ${activeEdition.name}`}
         />
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Link
-            href="/admin/fase-final"
-            className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-black text-amber-800 transition hover:bg-amber-100"
-          >
-            🏆 Reportar resultados etapa final
-          </Link>
-
+        <div className="mt-6 flex justify-end">
           <form action={logoutAction}>
             <button
               type="submit"

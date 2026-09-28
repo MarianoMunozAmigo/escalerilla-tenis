@@ -50,6 +50,7 @@ export default function MainNav() {
               <p className="truncate text-xs font-black uppercase tracking-[0.18em] sm:text-sm">
                 Escalerilla
               </p>
+
               <p
                 className={`truncate text-[11px] font-semibold sm:text-xs ${
                   isHome ? "text-white/75" : "text-slate-500"

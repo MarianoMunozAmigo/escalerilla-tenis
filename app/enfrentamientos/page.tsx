@@ -90,9 +90,6 @@ export default async function EnfrentamientosPage() {
     pairCountMap.set(key, (pairCountMap.get(key) ?? 0) + 1);
   });
 
-  const totalPossiblePairs = (players.length * (players.length - 1)) / 2;
-  const completedPairs = Array.from(pairCountMap.values()).filter((played) => played >= 2).length;
-
   let totalPendingMatches = 0;
   let totalAvailablePairs = 0;
 
@@ -112,7 +109,7 @@ export default async function EnfrentamientosPage() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,#ecfeff_0%,#f8fafc_28%,#f8fafc_100%)] text-slate-900">
       <div className="mobile-safe-x mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur">
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur sm:p-6">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(250,204,21,0.14),transparent_24%)]" />
 
           <div className="relative">
@@ -122,7 +119,7 @@ export default async function EnfrentamientosPage() {
                   {activeEdition.name}
                 </span>
 
-                <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+                <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">
                   Estado de enfrentamientos
                 </h1>
 
@@ -186,33 +183,33 @@ export default async function EnfrentamientosPage() {
                 key={player.id}
                 className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.07)]"
               >
-                <div className="border-b border-slate-100 bg-gradient-to-r from-white via-cyan-50/70 to-emerald-50/70 p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex min-w-0 items-center gap-3">
-                     <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-sm font-black text-slate-500">
-  {player.photo_url ? (
-    <img
-      src={player.photo_url}
-      alt={player.name}
-      className="h-full w-full object-contain p-1"
-    />
-  ) : (
-    getPlayerInitials(player.name)
-  )}
-</div>
+                <div className="border-b border-slate-100 bg-gradient-to-r from-white via-cyan-50/70 to-emerald-50/70 p-4 sm:p-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex w-full min-w-0 items-center gap-3 sm:w-auto">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-sm font-black text-slate-500">
+                        {player.photo_url ? (
+                          <img
+                            src={player.photo_url}
+                            alt={player.name}
+                            className="h-full w-full object-contain p-1"
+                          />
+                        ) : (
+                          getPlayerInitials(player.name)
+                        )}
+                      </div>
 
                       <div className="min-w-0">
-                        <h2 className="truncate text-xl font-black text-slate-950">
+                        <h2 className="text-xl font-black leading-tight text-slate-950 sm:truncate">
                           {player.name}
                         </h2>
 
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="mt-1 text-sm leading-5 text-slate-500">
                           Estado de sus enfrentamientos
                         </p>
                       </div>
                     </div>
 
-                    <span className="shrink-0 rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 px-4 py-2 text-xs font-black text-white shadow-sm">
+                    <span className="w-fit shrink-0 rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 px-4 py-2 text-xs font-black text-white shadow-sm">
                       {rivals.length} rivales
                     </span>
                   </div>
@@ -235,20 +232,20 @@ export default async function EnfrentamientosPage() {
                   </div>
                 </div>
 
-                <div className="max-h-[620px] space-y-3 overflow-y-auto p-5">
-                  {rivals.map(({ rival, played, status }) => (
+                <div className="max-h-[620px] space-y-3 overflow-y-auto p-4 sm:p-5">
+                  {rivals.map(({ rival, status }) => (
                     <div
                       key={`${player.id}-${rival.id}`}
-                      className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 ${status.rowClass}`}
+                      className={`flex flex-col gap-1 rounded-2xl border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 ${status.rowClass}`}
                     >
                       <Link
                         href={`/jugadores/${rival.id}`}
-                        className="min-w-0 truncate text-sm font-black transition hover:underline"
+                        className="min-w-0 text-sm font-black transition hover:underline sm:truncate"
                       >
                         {rival.name}
                       </Link>
 
-                      <span className={`shrink-0 text-right text-sm font-black ${status.badgeClass}`}>
+                      <span className={`shrink-0 text-sm font-black sm:text-right ${status.badgeClass}`}>
                         {status.label}
                       </span>
                     </div>
@@ -265,7 +262,7 @@ export default async function EnfrentamientosPage() {
           </section>
         )}
 
-        <section className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-2xl font-black">Registrar resultados</h2>
