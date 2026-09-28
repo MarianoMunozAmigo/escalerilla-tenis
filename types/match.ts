@@ -10,4 +10,5 @@ export type Match = {
   loser_points: number;
   match_date: string;
   created_at: string;
+  edition_id?: string | null;
 };

@@ -3,6 +3,7 @@ export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
 import { supabase } from "../../lib/supabase";
+import { getActiveEdition } from "../../lib/editions";
 import { buildStandings } from "../../lib/standings";
 import type { Player } from "../../types/player";
 import type { Match } from "../../types/match";
@@ -10,14 +11,18 @@ import type { TablePlayer } from "../../types/table-player";
 import TableModule from "../../components/TableModule";
 
 export default async function TablaPage() {
+  const activeEdition = await getActiveEdition();
+
   const { data: players, error: playersError } = await supabase
     .from("players")
     .select("*")
+    .eq("edition_id", activeEdition.id)
     .order("id", { ascending: true });
 
   const { data: matches, error: matchesError } = await supabase
     .from("matches")
     .select("*")
+    .eq("edition_id", activeEdition.id)
     .order("match_date", { ascending: false })
     .order("id", { ascending: false });
 
