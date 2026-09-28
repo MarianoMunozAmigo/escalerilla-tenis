@@ -4,10 +4,12 @@ export const fetchCache = "force-no-store";
 
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
+import { getActiveEdition } from "../../lib/editions";
 import type { Player } from "../../types/player";
 
 function parseStrengths(value?: string | null) {
   if (!value) return [];
+
   return value
     .split(",")
     .map((item) => item.trim())
@@ -16,9 +18,12 @@ function parseStrengths(value?: string | null) {
 }
 
 export default async function JugadoresPage() {
+  const activeEdition = await getActiveEdition();
+
   const { data: players, error } = await supabase
     .from("players")
     .select("*")
+    .eq("edition_id", activeEdition.id)
     .order("name", { ascending: true });
 
   const safePlayers: Player[] = players ?? [];
@@ -32,11 +37,12 @@ export default async function JugadoresPage() {
       <div className="mobile-safe-x mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
         <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.16),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(250,204,21,0.14),transparent_24%)]" />
+
           <div className="relative">
             <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
               <div className="max-w-3xl">
                 <span className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em] text-cyan-700">
-                  Perfiles deportivos
+                  {activeEdition.name}
                 </span>
 
                 <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
@@ -94,6 +100,7 @@ export default async function JugadoresPage() {
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
                   Directorio
                 </p>
+
                 <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
                   Perfiles disponibles
                 </h2>
@@ -154,6 +161,7 @@ export default async function JugadoresPage() {
                           <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
                             Descripción
                           </h3>
+
                           <p className="mt-2 min-h-[72px] text-sm leading-6 text-slate-700">
                             {player.short_description ||
                               "Sin descripción breve registrada."}
@@ -164,6 +172,7 @@ export default async function JugadoresPage() {
                           <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
                             Estilo de juego
                           </h3>
+
                           <p className="mt-2 min-h-[72px] text-sm leading-6 text-slate-700">
                             {player.play_style || "Sin estilo de juego registrado."}
                           </p>

@@ -4,6 +4,33 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "../../lib/supabase-admin";
 
+async function getActiveEditionId() {
+  const { data, error } = await supabaseAdmin
+    .from("editions")
+    .select("id")
+    .eq("is_active", true)
+    .eq("status", "active")
+    .single();
+
+  if (error || !data) {
+    throw new Error(`No se pudo obtener la edición activa: ${error?.message ?? "sin datos"}`);
+  }
+
+  return data.id as string;
+}
+
+function revalidateMatchPages(player1Id?: number, player2Id?: number) {
+  revalidatePath("/");
+  revalidatePath("/tabla");
+  revalidatePath("/partidos");
+  revalidatePath("/enfrentamientos");
+  revalidatePath("/jugadores");
+  revalidatePath("/admin");
+
+  if (player1Id) revalidatePath(`/jugadores/${player1Id}`);
+  if (player2Id) revalidatePath(`/jugadores/${player2Id}`);
+}
+
 export async function createMatch(formData: FormData) {
   const player1Id = Number(formData.get("player_1_id"));
   const player2Id = Number(formData.get("player_2_id"));
@@ -24,12 +51,14 @@ export async function createMatch(formData: FormData) {
     redirect("/admin?error=El+ganador+debe+ser+uno+de+los+dos+jugadores+seleccionados");
   }
 
+  const activeEditionId = await getActiveEditionId();
   const loserId = winnerId === player1Id ? player2Id : player1Id;
   const loserPoints = superTiebreak ? 1 : 0;
 
   const { data: allMatches, error: existingError } = await supabaseAdmin
     .from("matches")
-    .select("id, player_1_id, player_2_id");
+    .select("id, player_1_id, player_2_id")
+    .eq("edition_id", activeEditionId);
 
   if (existingError) {
     redirect(
@@ -60,6 +89,7 @@ export async function createMatch(formData: FormData) {
     winner_points: 3,
     loser_points: loserPoints,
     match_date: matchDate,
+    edition_id: activeEditionId,
   });
 
   if (insertError) {
@@ -70,14 +100,7 @@ export async function createMatch(formData: FormData) {
     );
   }
 
-  revalidatePath("/");
-  revalidatePath("/tabla");
-  revalidatePath("/partidos");
-  revalidatePath("/enfrentamientos");
-  revalidatePath("/jugadores");
-  revalidatePath(`/jugadores/${player1Id}`);
-  revalidatePath(`/jugadores/${player2Id}`);
-  revalidatePath("/admin");
+  revalidateMatchPages(player1Id, player2Id);
 
   redirect("/admin?success=Partido+registrado+correctamente");
 }
@@ -94,12 +117,6 @@ export async function updateMatch(formData: FormData) {
   if (!matchId || Number.isNaN(matchId)) {
     redirect("/admin?error=No+se+pudo+identificar+el+partido");
   }
-
-  const { data: currentMatch } = await supabaseAdmin
-    .from("matches")
-    .select("player_1_id, player_2_id")
-    .eq("id", matchId)
-    .single();
 
   if (!player1Id || !player2Id || !winnerId || !scoreText || !matchDate) {
     redirect(
@@ -119,12 +136,22 @@ export async function updateMatch(formData: FormData) {
     );
   }
 
+  const activeEditionId = await getActiveEditionId();
+
+  const { data: currentMatch } = await supabaseAdmin
+    .from("matches")
+    .select("player_1_id, player_2_id")
+    .eq("id", matchId)
+    .eq("edition_id", activeEditionId)
+    .single();
+
   const loserId = winnerId === player1Id ? player2Id : player1Id;
   const loserPoints = superTiebreak ? 1 : 0;
 
   const { data: allMatches, error: existingError } = await supabaseAdmin
     .from("matches")
-    .select("id, player_1_id, player_2_id");
+    .select("id, player_1_id, player_2_id")
+    .eq("edition_id", activeEditionId);
 
   if (existingError) {
     redirect(
@@ -160,8 +187,10 @@ export async function updateMatch(formData: FormData) {
       winner_points: 3,
       loser_points: loserPoints,
       match_date: matchDate,
+      edition_id: activeEditionId,
     })
-    .eq("id", matchId);
+    .eq("id", matchId)
+    .eq("edition_id", activeEditionId);
 
   if (updateError) {
     redirect(
@@ -171,20 +200,12 @@ export async function updateMatch(formData: FormData) {
     );
   }
 
-  revalidatePath("/");
-  revalidatePath("/tabla");
-  revalidatePath("/partidos");
-  revalidatePath("/enfrentamientos");
-  revalidatePath("/jugadores");
-  revalidatePath(`/jugadores/${player1Id}`);
-  revalidatePath(`/jugadores/${player2Id}`);
+  revalidateMatchPages(player1Id, player2Id);
 
   if (currentMatch) {
     revalidatePath(`/jugadores/${currentMatch.player_1_id}`);
     revalidatePath(`/jugadores/${currentMatch.player_2_id}`);
   }
-
-  revalidatePath("/admin");
 
   redirect("/admin?success=Partido+actualizado+correctamente");
 }
@@ -196,16 +217,20 @@ export async function deleteMatch(formData: FormData) {
     redirect("/admin?error=No+se+pudo+identificar+el+partido+a+eliminar");
   }
 
+  const activeEditionId = await getActiveEditionId();
+
   const { data: currentMatch } = await supabaseAdmin
     .from("matches")
     .select("player_1_id, player_2_id")
     .eq("id", matchId)
+    .eq("edition_id", activeEditionId)
     .single();
 
   const { error } = await supabaseAdmin
     .from("matches")
     .delete()
-    .eq("id", matchId);
+    .eq("id", matchId)
+    .eq("edition_id", activeEditionId);
 
   if (error) {
     redirect(
@@ -215,17 +240,7 @@ export async function deleteMatch(formData: FormData) {
     );
   }
 
-  revalidatePath("/");
-  revalidatePath("/tabla");
-  revalidatePath("/partidos");
-  revalidatePath("/enfrentamientos");
-  revalidatePath("/jugadores");
-  revalidatePath("/admin");
-
-  if (currentMatch) {
-    revalidatePath(`/jugadores/${currentMatch.player_1_id}`);
-    revalidatePath(`/jugadores/${currentMatch.player_2_id}`);
-  }
+  revalidateMatchPages(currentMatch?.player_1_id, currentMatch?.player_2_id);
 
   redirect("/admin?success=Partido+eliminado+correctamente");
 }

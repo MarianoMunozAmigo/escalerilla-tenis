@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
+import { getActiveEdition } from "../../lib/editions";
 import type { Player } from "../../types/player";
 import type { Match } from "../../types/match";
 import { createMatch, deleteMatch } from "./actions";
@@ -17,6 +19,7 @@ type AdminPageProps = {
 };
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
+  const activeEdition = await getActiveEdition();
   const params = await searchParams;
   const successMessage = params?.success ?? "";
   const errorMessage = params?.error ?? "";
@@ -24,12 +27,14 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const { data: players, error: playersError } = await supabase
     .from("players")
     .select("*")
+    .eq("edition_id", activeEdition.id)
     .eq("active", true)
     .order("name", { ascending: true });
 
   const { data: matches, error: matchesError } = await supabase
     .from("matches")
     .select("*")
+    .eq("edition_id", activeEdition.id)
     .order("match_date", { ascending: false })
     .order("id", { ascending: false });
 
@@ -46,18 +51,26 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       <div className="mx-auto max-w-5xl px-6 py-10">
         <ModuleHero
           title="Administración"
-          description="Panel de registro y gestión de resultados de la escalerilla."
+          description={`Panel de registro y gestión de resultados. Edición activa: ${activeEdition.name}`}
         />
-        <div className="mt-6 flex justify-end">
-  <form action={logoutAction}>
-    <button
-      type="submit"
-      className="rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-100"
-    >
-      Cerrar sesión
-    </button>
-  </form>
-</div>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Link
+            href="/admin/fase-final"
+            className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-black text-amber-800 transition hover:bg-amber-100"
+          >
+            🏆 Reportar resultados etapa final
+          </Link>
+
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="rounded-2xl border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-100"
+            >
+              Cerrar sesión
+            </button>
+          </form>
+        </div>
 
         {successMessage && (
           <p className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
@@ -80,8 +93,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         {!playersError && (
           <div className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-2xl font-black">Registrar partido</h2>
+
             <p className="mt-1 text-slate-600">
-              Ingresa aquí el resultado oficial de un encuentro.
+              Ingresa aquí el resultado oficial de un encuentro de la edición activa.
             </p>
 
             <AdminMatchForm players={safePlayers} action={createMatch} />
@@ -92,8 +106,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <div className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5">
               <h2 className="text-2xl font-black">Partidos registrados</h2>
+
               <p className="mt-1 text-slate-600">
-                Desde aquí puedes revisar, editar y eliminar partidos cargados.
+                Desde aquí puedes revisar, editar y eliminar partidos cargados en la edición activa.
               </p>
             </div>
 
@@ -152,9 +167,4 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       </div>
     </main>
   );
-  <Link href="/admin/fase-final" className="admin-card">
-  <span>🏆</span>
-  <strong>Reportar resultados etapa final</strong>
-  <small>Qualy, cuartos, semifinales y final</small>
-</Link>
 }

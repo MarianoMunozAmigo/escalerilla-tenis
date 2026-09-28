@@ -1,7 +1,9 @@
 export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
+import { getActiveEdition } from "../../../../lib/editions";
 import type { Player } from "../../../../types/player";
 import { updateMatch } from "../../actions";
 import ModuleHero from "../../../../components/ModuleHero";
@@ -20,6 +22,7 @@ export default async function EditMatchPage({
   params,
   searchParams,
 }: EditMatchPageProps) {
+  const activeEdition = await getActiveEdition();
   const { id } = await params;
   const parsedId = Number(id);
 
@@ -33,6 +36,7 @@ export default async function EditMatchPage({
   const { data: players, error: playersError } = await supabase
     .from("players")
     .select("*")
+    .eq("edition_id", activeEdition.id)
     .eq("active", true)
     .order("name", { ascending: true });
 
@@ -40,6 +44,7 @@ export default async function EditMatchPage({
     .from("matches")
     .select("*")
     .eq("id", parsedId)
+    .eq("edition_id", activeEdition.id)
     .single();
 
   if (matchError || !match) {
@@ -62,7 +67,7 @@ export default async function EditMatchPage({
 
         <ModuleHero
           title="Editar partido"
-          description="Corrige los datos de un partido registrado sin necesidad de eliminarlo."
+          description={`Corrige los datos de un partido registrado en ${activeEdition.name}.`}
         />
 
         {errorMessage && (
@@ -80,6 +85,7 @@ export default async function EditMatchPage({
         {!playersError && (
           <div className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-2xl font-black">Modificar partido</h2>
+
             <p className="mt-1 text-slate-600">
               Ajusta el marcador o corrige cualquier dato cargado por error.
             </p>
