@@ -3,7 +3,7 @@ import "./globals.css";
 import MainNav from "../components/MainNav";
 
 export const metadata: Metadata = {
-  title: "Escalerilla de Tenis - 3° Edición",
+  title: "Escalerilla de Tenis - 4° Edición",
   description: "Plataforma web para gestionar jugadores, partidos y tabla de posiciones.",
 };
 

@@ -189,17 +189,17 @@ export default async function EnfrentamientosPage() {
                 <div className="border-b border-slate-100 bg-gradient-to-r from-white via-cyan-50/70 to-emerald-50/70 p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 text-sm font-black text-slate-500">
-                        {player.photo_url ? (
-                          <img
-                            src={player.photo_url}
-                            alt={player.name}
-                            className="h-full w-full object-cover object-[center_20%]"
-                          />
-                        ) : (
-                          getPlayerInitials(player.name)
-                        )}
-                      </div>
+                     <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-sm font-black text-slate-500">
+  {player.photo_url ? (
+    <img
+      src={player.photo_url}
+      alt={player.name}
+      className="h-full w-full object-contain p-1"
+    />
+  ) : (
+    getPlayerInitials(player.name)
+  )}
+</div>
 
                       <div className="min-w-0">
                         <h2 className="truncate text-xl font-black text-slate-950">
