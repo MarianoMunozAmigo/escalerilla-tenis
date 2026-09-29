@@ -41,7 +41,7 @@ const editions: EditionPodium[] = [
       name: "Mariano Muñoz",
       label: "Tercer lugar",
       image: "/jugadores/mariano.png",
-      imageClassName: "hrelative h-[122%] w-[122%] max-w-none object-cover object-[58%_18%]",
+      imageClassName: "relative h-[105%] w-[105%] max-w-none object-contain object-[center_70%] translate-y-3",
     },
   },
   {
@@ -64,7 +64,7 @@ const editions: EditionPodium[] = [
       name: "Mariano Muñoz",
       label: "Tercer lugar",
       image: "/jugadores/mariano.png",
-      imageClassName: "relative h-[122%] w-[122%] max-w-none object-cover object-[58%_18%]",
+      imageClassName: "relative h-[105%] w-[105%] max-w-none object-contain object-[center_70%] translate-y-3",
     },
   },
   {
