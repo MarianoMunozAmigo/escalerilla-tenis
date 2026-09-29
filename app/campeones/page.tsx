@@ -9,6 +9,7 @@ type ChampionPlace = {
   name: string;
   label: string;
   image: string;
+  imageClassName?: string;
 };
 
 type EditionPodium = {
@@ -40,6 +41,7 @@ const editions: EditionPodium[] = [
       name: "Mariano Muñoz",
       label: "Tercer lugar",
       image: "/jugadores/mariano.png",
+      imageClassName: "hrelative h-[122%] w-[122%] max-w-none object-cover object-[58%_18%]",
     },
   },
   {
@@ -62,6 +64,7 @@ const editions: EditionPodium[] = [
       name: "Mariano Muñoz",
       label: "Tercer lugar",
       image: "/jugadores/mariano.png",
+      imageClassName: "relative h-[122%] w-[122%] max-w-none object-cover object-[58%_18%]",
     },
   },
   {
@@ -88,6 +91,52 @@ const editions: EditionPodium[] = [
   },
 ];
 
+function TrophyIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 120 120"
+      aria-hidden="true"
+      className={className}
+      fill="none"
+    >
+      <path
+        d="M37 16h46v18c0 20.4-9.3 34.5-23 38.8C46.3 68.5 37 54.4 37 34V16Z"
+        fill="currentColor"
+      />
+      <path
+        d="M30 23H15v8c0 16.4 8.6 28.7 24.2 32.4"
+        stroke="currentColor"
+        strokeWidth="8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M90 23h15v8c0 16.4-8.6 28.7-24.2 32.4"
+        stroke="currentColor"
+        strokeWidth="8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M60 73v17"
+        stroke="currentColor"
+        strokeWidth="8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M42 96h36"
+        stroke="currentColor"
+        strokeWidth="8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M33 106h54"
+        stroke="currentColor"
+        strokeWidth="8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function getMedal(position: 1 | 2 | 3) {
   if (position === 1) return "🥇";
   if (position === 2) return "🥈";
@@ -97,27 +146,33 @@ function getMedal(position: 1 | 2 | 3) {
 function getPositionClass(position: 1 | 2 | 3) {
   if (position === 1) {
     return {
-      card: "border-yellow-300 bg-gradient-to-b from-yellow-50 via-white to-amber-50 shadow-[0_18px_55px_rgba(234,179,8,0.20)]",
-      badge: "bg-yellow-400 text-slate-950",
-      image: "h-32 w-32 sm:h-40 sm:w-40",
-      title: "text-2xl sm:text-3xl",
+      card: "border-yellow-300 bg-gradient-to-b from-yellow-50 via-white to-amber-50 shadow-[0_24px_70px_rgba(234,179,8,0.28)]",
+      badge: "bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-400 text-slate-950 shadow-[0_10px_28px_rgba(234,179,8,0.35)]",
+      image: "h-36 w-36 sm:h-44 sm:w-44",
+      title: "text-3xl sm:text-4xl",
+      glow: true,
+      trophy: "text-yellow-300/18",
     };
   }
 
   if (position === 2) {
     return {
-      card: "border-slate-300 bg-gradient-to-b from-slate-50 via-white to-slate-100 shadow-[0_14px_45px_rgba(15,23,42,0.10)]",
-      badge: "bg-slate-800 text-white",
-      image: "h-24 w-24 sm:h-32 sm:w-32",
-      title: "text-xl sm:text-2xl",
+      card: "border-slate-300 bg-gradient-to-b from-slate-50 via-white to-slate-100 shadow-[0_16px_48px_rgba(15,23,42,0.12)]",
+      badge: "bg-slate-900 text-white shadow-[0_10px_26px_rgba(15,23,42,0.22)]",
+      image: "h-28 w-28 sm:h-34 sm:w-34",
+      title: "text-2xl sm:text-3xl",
+      glow: false,
+      trophy: "text-slate-300/22",
     };
   }
 
   return {
-    card: "border-orange-300 bg-gradient-to-b from-orange-50 via-white to-amber-50 shadow-[0_14px_45px_rgba(234,88,12,0.12)]",
-    badge: "bg-orange-500 text-white",
-    image: "h-24 w-24 sm:h-32 sm:w-32",
-    title: "text-xl sm:text-2xl",
+    card: "border-orange-300 bg-gradient-to-b from-orange-50 via-white to-amber-50 shadow-[0_16px_48px_rgba(234,88,12,0.14)]",
+    badge: "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-[0_10px_26px_rgba(234,88,12,0.24)]",
+    image: "h-28 w-28 sm:h-34 sm:w-34",
+    title: "text-2xl sm:text-3xl",
+    glow: false,
+    trophy: "text-orange-300/20",
   };
 }
 
@@ -126,28 +181,51 @@ function PodiumCard({ player }: { player: ChampionPlace }) {
 
   return (
     <article
-      className={`relative overflow-hidden rounded-[2rem] border p-5 text-center ${style.card}`}
+      className={`group relative min-h-full overflow-hidden rounded-[2.1rem] border p-5 text-center transition duration-300 hover:-translate-y-1 ${style.card}`}
     >
       <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-cyan-400 via-emerald-400 to-yellow-300" />
 
-      <div className="mx-auto flex w-fit flex-col items-center">
+      {style.glow && (
+        <>
+          <div className="absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-yellow-300/30 blur-3xl" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.24),transparent_44%)]" />
+          <div className="absolute left-6 top-7 h-2 w-2 rounded-full bg-yellow-300 shadow-[0_0_22px_rgba(250,204,21,0.9)]" />
+          <div className="absolute right-8 top-16 h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(34,211,238,0.9)]" />
+          <div className="absolute bottom-14 left-10 h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(52,211,153,0.9)]" />
+        </>
+      )}
+
+      <TrophyIcon
+        className={`pointer-events-none absolute -right-8 top-8 h-36 w-36 rotate-12 ${style.trophy}`}
+      />
+
+      <div className="relative mx-auto flex w-fit flex-col items-center">
         <span
-          className={`mb-4 inline-flex rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.16em] shadow-sm ${style.badge}`}
+          className={`mb-4 inline-flex rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.16em] ${style.badge}`}
         >
           {getMedal(player.position)} {player.label}
         </span>
 
         <div
-          className={`flex items-center justify-center overflow-hidden rounded-[2rem] border border-white/80 bg-white shadow-xl ${style.image}`}
+          className={`relative flex items-center justify-center overflow-hidden rounded-[2rem] border border-white/90 bg-white shadow-xl ring-1 ring-black/5 ${style.image}`}
         >
+          {style.glow && (
+            <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-tr from-yellow-200/20 via-transparent to-cyan-200/20" />
+          )}
+
           <img
             src={player.image}
             alt={player.name}
-            className="h-full w-full object-contain p-1"
+            className={
+              player.imageClassName ??
+              "relative h-full w-full object-contain object-center p-1"
+            }
           />
         </div>
 
-        <h3 className={`mt-5 font-black tracking-tight text-slate-950 ${style.title}`}>
+        <h3
+          className={`mt-5 font-black leading-tight tracking-tight text-slate-950 ${style.title}`}
+        >
           {player.name}
         </h3>
 
@@ -163,16 +241,22 @@ export default function CampeonesPage() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,#ecfeff_0%,#f8fafc_30%,#f8fafc_100%)] text-slate-900">
       <div className="mobile-safe-x mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
-        <section className="relative overflow-hidden rounded-[2.2rem] border border-white/70 bg-slate-950 p-6 text-white shadow-[0_22px_70px_rgba(15,23,42,0.25)] sm:p-8">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.26),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(250,204,21,0.20),transparent_26%)]" />
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-emerald-950/80" />
+        <section className="relative overflow-hidden rounded-[2.4rem] border border-white/70 bg-slate-950 p-6 text-white shadow-[0_28px_90px_rgba(15,23,42,0.32)] sm:p-8 lg:p-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.30),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(250,204,21,0.24),transparent_28%)]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/92 to-emerald-950/84" />
 
-          <div className="relative">
+          <TrophyIcon className="pointer-events-none absolute -right-12 top-8 h-72 w-72 rotate-12 text-yellow-300/10 sm:h-96 sm:w-96 lg:right-10 lg:top-2 lg:h-[30rem] lg:w-[30rem]" />
+
+          <div className="absolute left-8 top-8 h-2 w-2 rounded-full bg-yellow-300 shadow-[0_0_24px_rgba(250,204,21,0.9)]" />
+          <div className="absolute bottom-12 right-20 h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_24px_rgba(34,211,238,0.9)]" />
+          <div className="absolute bottom-20 left-1/2 h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.9)]" />
+
+          <div className="relative max-w-4xl">
             <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-cyan-100 backdrop-blur">
               Salón de campeones
             </span>
 
-            <h1 className="mt-5 max-w-4xl text-4xl font-black uppercase leading-[0.95] tracking-tight sm:text-6xl">
+            <h1 className="mt-5 text-4xl font-black uppercase leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
               Campeones de
               <span className="block bg-gradient-to-r from-yellow-300 via-cyan-300 to-emerald-300 bg-clip-text text-transparent">
                 ediciones anteriores
@@ -180,9 +264,9 @@ export default function CampeonesPage() {
             </h1>
 
             <p className="mt-5 max-w-3xl text-base leading-7 text-white/82 sm:text-lg">
-              Reconocimiento a los jugadores que marcaron la historia de la escalerilla.
-              Cada edición deja nuevos desafíos, rivalidades y referentes para quienes
-              buscan llegar al podio.
+              Reconocimiento a quienes marcaron la historia de la escalerilla. Cada
+              edición deja nuevos desafíos, rivalidades y referentes para quienes buscan
+              llegar al podio.
             </p>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -207,10 +291,12 @@ export default function CampeonesPage() {
           {editions.map((edition) => (
             <article
               key={edition.edition}
-              className="overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.08)]"
+              className="overflow-hidden rounded-[2.4rem] border border-slate-200 bg-white shadow-[0_20px_65px_rgba(15,23,42,0.09)]"
             >
-              <div className="border-b border-slate-100 bg-gradient-to-r from-white via-cyan-50 to-yellow-50 p-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-r from-white via-cyan-50 to-yellow-50 p-6">
+                <TrophyIcon className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rotate-12 text-yellow-300/18" />
+
+                <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-700">
                       Historial oficial
@@ -225,13 +311,13 @@ export default function CampeonesPage() {
                     </p>
                   </div>
 
-                  <span className="w-fit rounded-full bg-slate-950 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white">
+                  <span className="w-fit rounded-full bg-slate-950 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white shadow-lg">
                     Podio histórico
                   </span>
                 </div>
               </div>
 
-              <div className="grid gap-4 p-5 lg:grid-cols-[0.9fr_1.2fr_0.9fr] lg:items-end sm:p-6">
+              <div className="grid gap-4 p-5 sm:p-6 lg:grid-cols-[0.9fr_1.2fr_0.9fr] lg:items-end">
                 <div className="order-2 lg:order-1">
                   <PodiumCard player={edition.second} />
                 </div>
@@ -246,6 +332,52 @@ export default function CampeonesPage() {
               </div>
             </article>
           ))}
+        </section>
+
+        <section className="mt-8 overflow-hidden rounded-[2.4rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-[0_24px_80px_rgba(15,23,42,0.26)] sm:p-8 lg:p-10">
+          <div className="relative">
+            <div className="absolute -right-12 -top-16 h-56 w-56 rounded-full bg-yellow-300/20 blur-3xl" />
+            <div className="absolute -bottom-20 -left-16 h-60 w-60 rounded-full bg-cyan-300/15 blur-3xl" />
+
+            <div className="relative grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-cyan-200">
+                  La historia continúa
+                </p>
+
+                <h2 className="mt-4 text-4xl font-black uppercase leading-none tracking-tight sm:text-5xl">
+                  ¿Quién será el próximo campeón?
+                </h2>
+
+                <p className="mt-4 max-w-2xl text-base leading-7 text-white/78 sm:text-lg">
+                  La 4° edición ya está en marcha. Cada partido suma, cada punto pesa y
+                  cada jugador tiene la oportunidad de escribir su nombre en esta galería.
+                </p>
+              </div>
+
+              <div className="rounded-[2rem] border border-white/15 bg-white/10 p-5 backdrop-blur">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-yellow-300 via-cyan-300 to-emerald-300 text-3xl shadow-xl">
+                    🏆
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-bold text-white/70">Meta actual</p>
+                    <p className="mt-1 text-2xl font-black">
+                      Entrar al podio histórico
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/tabla"
+                  className="mt-5 inline-flex w-full justify-center rounded-2xl bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-50"
+                >
+                  Revisar clasificación actual
+                </Link>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </main>
